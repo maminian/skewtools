@@ -1,0 +1,172 @@
+! This is a set of functions needed to calculate the exact statistics
+! in the duct. The functions take the formulas for the noncentered
+! moments \int_{-\infty}^\infty x^j (\int_-1^1 \int_-1^1 T_0(x-ut,y,z) dy dz) dx
+!
+! via eigenfunction expansion of u, derived in the paper, and returns
+! the values as a result of truncating the relevant series.
+!
+
+!
+! ------------------
+!
+
+double precision function avg_phi_ss(i,aratio)
+
+     implicit none
+     integer                       :: i,ko
+     double precision              :: aratio,l,om
+     double precision, parameter   :: pi = 4.0d0*datan(1.0d0)
+
+     l = 1.0d0/aratio
+     
+     ko = 2*i-1
+     om = pi*ko/(2.0d0*l)
+
+     avg_phi_ss = 32.0d0*l*dtanh(-om)/( (ko*pi)**5 )
+
+     ! Factor of four in front of the sum
+     avg_phi_ss = 4.0d0*avg_phi_ss
+     
+end function avg_phi_ss
+!
+! ------------------
+!
+double precision function avg_phi_sq_ss(i,aratio)
+
+     implicit none
+     integer             :: i,ko
+     double precision    :: aratio,l,om,pi
+     
+     double precision, parameter   :: pi = 4.0d0*datan(1.0d0)
+
+     ko = 2*i-1
+     om = pi*ko/(2.0d0*l)
+     
+     avg_phi_sq_ss = 16.0d0/( dcosh(-om)**2 * (pi*ko)**6 ) &
+                    - l*dsinh(-2.0d0*l)/( dcosh(-om)**2 * (pi*ko)**7 )
+
+     ! Factor of four in front of the sum, squared.
+     avg_phi_sq_ss = 16.0d0*avg_phi_sq_ss
+     
+end function avg_phi_sq_ss
+!
+! ------------------
+!
+double precision function avg_phi_f_ss(i,aratio)
+
+     implicit none
+     integer             :: i,ko
+     double precision    :: aratio,l,om,pi
+     
+     double precision, parameter   :: pi = 4.0d0*datan(1.0d0)
+
+     ko = 2*i-1
+     om = pi*ko/(2.0d0*l)
+     
+     avg_phi_f_ss = 256.0d0*l*dtanh(-om)/( (pi*ko)**7 )
+
+     avg_phi_f_ss = avg_phi_f_ss - 64.0d0/3.0d0*l*dtanh(-om)/( (pi*ko)**5 )
+
+     avg_phi_f_ss = 4.0d0*avg_phi_f_ss
+
+end function avg_phi_f_ss
+!
+! ------------------
+!
+double precision function compute_u1_noncenter_exact_ss(nTerms,aratio)
+     implicit none
+     ! Input
+     integer                                 :: nTerms
+     double precision                        :: aratio
+     
+     ! Internal
+     integer             :: k
+     double precision    :: ps
+     
+     
+     ! Functions
+     double precision avg_phi_ss
+     
+     ps = 0.0d0
+
+     do k=1,nTerms
+          ps = ps + avg_phi_ss(k,aratio)
+     end do
+     
+     ps = ps + 2.0d0/3.0d0
+
+     compute_u1_noncenter_exact_ss = ps
+
+end function compute_u1_noncenter_exact_ss
+
+! ------------------
+
+double precision function compute_u2_noncenter_exact_ss(nTerms,aratio)
+     implicit none
+     ! Input
+     integer                                 :: nTerms
+     double precision                        :: aratio
+     
+     ! Internal
+     integer             :: k
+     double precision    :: ps
+     
+     ! Functions
+     double precision avg_phi_sq_ss
+
+     ! With this formula, we need to calculate this in three parts 
+     ! because of the functional term.
+
+     ps = 0.0d0
+
+     do k=1,nTerms
+
+          ! Middle term
+          ps = ps + avg_phi_f_ss(k,aratio)
+          ! Last term
+          ps = ps + avg_phi_sq_ss(k,aratio)
+     end do
+     
+     ! First term
+     ps = ps + 4.0d0/45.0d0
+
+     compute_u2_noncenter_exact_ss = ps
+
+end function compute_u2_noncenter_exact_ss
+
+! ------------------
+
+double precision function compute_u3_noncenter_exact_ss(nTerms,aratio)
+     implicit none
+     ! Input
+     integer             :: nTerms
+     double precision    :: aratio
+     
+     ! Internal
+     integer   :: a,b,c,i,j,m,n,p,q
+     
+     ! Functions
+     double precision Alpha_eval
+     
+     
+     compute_u3_noncenter_exact = 0.0d0
+     do a=1,nTerms
+          i = idxlist(a,1)
+          j = idxlist(a,2)
+          do b=1,nTerms
+               m = idxlist(b,1)
+               n = idxlist(b,2)
+               do c=1,nTerms
+                    p = idxlist(c,1)
+                    q = idxlist(c,2)
+                    
+                    compute_u3_noncenter_exact = compute_u3_noncenter_exact + &
+                         uij_vals(a)*uij_vals(b)*uij_vals(c)*Alpha_eval(i,m,p)*Alpha_eval(j,n,q)
+                    
+               end do
+          end do
+     end do
+     
+     
+end function compute_u3_noncenter_exact_ss
+

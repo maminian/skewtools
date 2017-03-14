@@ -1,0 +1,139 @@
+# Automate running batches of simulations,
+# based on where they are being run
+# (local computer, or UNC's kure/killdevil,
+# or UNC's longleaf).
+#
+#
+
+import subprocess,os
+
+# -------------------------
+# Parameters specifying the number of runs,
+# and location and names for output files.
+# -------------------
+
+execute = "local"   # if "local" then run directly, sequentially.
+                    # "bsub" submits jobs to Kure/Killdevil.
+                    # "longleaf" submits jobs to Longleaf.
+
+n = 1               # number of trials to run.
+fname_prefix = "c_test_"
+parent = "./temp/"
+sim_folder = ""
+
+exe_loc = "./channel_mc"
+
+# ------------------
+# More bsub options
+
+memoryreq = 8	# memory requirement in GB
+queue = "week"
+
+# ---------------------------
+
+folder = parent+sim_folder
+file_prefix = folder+fname_prefix
+out_suffix = '.h5'
+
+# ------------------------
+
+def process_parameter_file(time_loc,i):
+# Looks at the parameter file, checks if the line 
+# specifying the RNG seed is filled in with an 
+# integer. If it is, leave it. If not, replace the line 
+# with a seed based on the operating system RNG 
+# (eg, /dev/urandom.) Python handles this part automatically.
+
+     tfile = open(time_loc,'r')
+     lines = tfile.readlines()
+     
+     # If thing is not an integer, replace the line 
+     # with a random seed.
+     sidx = 31 # Line which should hold the seed.
+     seed = lines[sidx].split()
+     try:
+          int(seed)
+     except:
+          int1 = int(os.urandom(10).encode('hex'),16)
+          int2 = i*int(os.urandom(10).encode('hex'),16)
+          
+          # Bitwise XOR. Why? I don't know. Just because.
+          int3 = int1^int2
+          
+          lines[sidx] = str(int3)[-8:-1]+' \n'
+     # end try
+     tfile.close()
+     
+     tfile = open(time_loc,'w')
+     tfile.writelines(lines)
+     tfile.close()
+     
+# end def
+
+# Creating simulation initialization files.
+for i in range(n):
+     # Make a four-digit index (0000 through 9999)
+     stridx = str(i).zfill(4)
+
+     param_loc = folder+"parameters_mc_"+fname_prefix+stridx+".txt"
+     out_loc = file_prefix+stridx
+
+     # Copy the parameter files to the appropriate place, and 
+     # generate seeds if necessary.
+     copy_command1 = ["cp","parameters_mc.txt",param_loc]
+
+     subprocess.call(copy_command1)
+
+     process_parameter_file(param_loc,i)        
+# end if
+
+# Running simulations after the files are created.
+for i in range(n):
+
+     stridx = str(i).zfill(4)
+
+     param_loc = folder+"parameters_mc_"+fname_prefix+stridx+".txt"
+     out_loc = file_prefix+stridx+out_suffix
+     
+     if (execute=="bsub"):
+          bsub_prefix = ["bsub","-n","1","-o",parent+"out/"+"out."+stridx,"-e",parent+"err/"+"err."+stridx]
+
+          if (queue == "week"):
+               more = ["-q",queue]
+          else:
+               more = ["-M",str(int(memoryreq)),"-q",queue]
+          # end if
+
+          exe_command = [exe_loc,param_loc,out_loc]
+
+          command = bsub_prefix + more + exe_command
+     elif (execute=="local"):
+          exe_command = [exe_loc,param_loc,out_loc]
+
+          command = exe_command
+     elif (execute=="longleaf"):
+          longleaf_prefix = ["sbatch","-n","1","-o",parent+"out/"+"out."+stridx,"-e",parent+"err/"+"err."+stridx]
+
+          if (queue == "day"):
+               tlimit = ["-t","%i:00"%(24,)]
+          elif (queue == "week"):
+               tlimit = ["-t","%i-%i"%(10,23)]
+          else:
+               tlimit = ["-t","%i:00"%(1,)]
+          # end if
+          mem = ["--mem","%i"%memoryreq]
+
+#          exe_command = ["--wrap=\' %s"%exe_loc,"%s"%param_loc, "%s \'"%out_loc]
+          exe_command = ["--wrap=%s %s %s"%(exe_loc,param_loc,out_loc)]
+#          exe_command = ["--wrap","=",exe_loc,param_loc,out_loc]
+
+          command = longleaf_prefix + tlimit + mem + exe_command
+          print command
+     else:
+          print "Unrecognized platform; \"execute\" must be one of \"local\", \"bsub\", or \"longleaf\"."
+     # end if
+
+
+     subprocess.call(command)
+     
+# end for
