@@ -1,0 +1,5 @@
+0.54		! First guess for root
+0.53		! Second guess
+1.0d-12		! Tolerance
+1024		! nTerms
+exact		! flow type

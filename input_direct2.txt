@@ -1,0 +1,5 @@
+12 ! Number of aspect ratios
+0.01d0,0.05d0,0.1d0,0.2d0,0.3d0,0.4d0,0.5d0,0.6d0,0.7d0,0.8d0,0.9d0,1.0d0
+64 ! Max index in M
+1 ! Max index in N. Multiplied with M for index set sum. Deprecated.
+hybrid
