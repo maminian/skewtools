@@ -1,14 +1,33 @@
 **README last updated: 14 March 2017**
 
-This code has been written for my own use, so 
+## Introduction.
+
+![preview](web_images/pipevid0180.png)
+
+This is a collection of codes and scripts for 
+analyzing a passive tracer in 
+laminar pipe flow. The code was produced 
+as a part of my PhD dissertation work, 
+but it is in the process of being generalized 
+enough to handle a variety of different situations. 
+
+A "passive tracer" (or passive scalar) is solute, 
+pollutant, etc, which doesn't influence the fluid flow 
+that is carrying it. In my case, I am interested 
+in the behavior of the tracer itself, but 
+if one was worried about an inverse problem, 
+they might try to infer things about the flow 
+field from the motion of the tracer.
+
+This code was written mainly for my own use, so 
 work needs to be done to make it more modular,
 readable, etc. As progress gets made in this 
-department, fewer "core" requirements will be 
-necessary for the bare minimum.
+area, fewer "core" requirements (as described below) 
+will be necessary to compile a minimal 
+working example and visualize it.
 
-All of these prerequisites, if not already 
-on your linux distribution, can easily 
-be installed with the distribution's package 
+Most (if not all) of these prerequisites should 
+be installed with your operating system's package 
 manager (for example, apt-get in Ubuntu). 
 For the python packages, I recommend using 
 the "pip" package manager. An example setup 
@@ -29,7 +48,7 @@ and i/o is handled with HDF5, a data container which
 allows mixed output (doubles, integers, strings, etc) 
 in a single file with a directory structure. This is 
 both compact (i.e., one file per simulation) and 
-being self-documenting (data in the file  
+being self-documenting (data in the file
 comes with plain-text descriptions).
 
 For all this, you need:
@@ -120,13 +139,13 @@ If you run the job locally, you should see something like this:
 > 
 >                                          Peclet:  1.000E+01
 > 
->                             Number of particles: 1000000        
+>                             Number of particles: 1000000
 >                                   Time interval: ( 0.000E+00 ,  1.000E+00 )
->                   Number of requested timesteps: 1001           
->                    Number of internal timesteps: 1002           
+>                   Number of requested timesteps: 1001
+>                    Number of internal timesteps: 1002
 >                       Largest internal timestep:  1.000E-03
 > 
->                 Mersenne Twister seed: 7270442        
+>                 Mersenne Twister seed: 7270442
 > 
 >================================================================================
 > 
@@ -182,15 +201,14 @@ of = h5py.File('output.h5','r')
 of.keys()
 ```
 
-*It is also possible to use the command-line tool h5dump that should 
-come with the hdf5-tools package. For example, running this at the terminal:
+* It is also possible to use the command-line tool h5dump that should come with the hdf5-tools package. For example, running this at the terminal: *
 
 ```
 h5dump -H output.h5 
 ```
 
-gives an [admittedly cryptic until you have experience with it] 
-output of all the arrays stored in the file.*
+* gives a (relatively cryptic) 
+output of all the arrays stored in the file. *
 
 
 ## Contact.
