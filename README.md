@@ -222,14 +222,13 @@ of = h5py.File('output.h5','r')
 of.keys()
 ```
 
-* It is also possible to use the command-line tool h5dump that should come with the hdf5-tools package. For example, running this at the terminal: *
+It is also possible to use the command-line tool h5dump that should come with the hdf5-tools package. For example, running this at the terminal:
 
 ```
 h5dump -H output.h5 
 ```
 
-* gives a (relatively cryptic) 
-output of all the arrays stored in the file. *
+gives a (relatively cryptic) output of all the arrays stored in the file.
 
 
 ## Contact.
