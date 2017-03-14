@@ -103,7 +103,7 @@ the simulation data will be written (note, you need
 to change the RNG seed in parameters_mc.txt to an 
 integer if you go this route).
 
-HOWEVER, it is highly recommended you instead 
+**However**, it is highly recommended you instead 
 use "batch_submit.py" to call one of the executables. 
 This allows for a few things:
 
@@ -111,12 +111,13 @@ This allows for a few things:
     running the same code multiple times with different 
     seeds for the RNG
   2. Running the code on one of UNC's clusters:
-    *"bsub" assumes an LSF system (on the kure/killdevil clusters)
-    *"longleaf" assumes a SLURM system (on the longleaf cluster)
-    *"local" assumes you're running it on your own computer
+    * "bsub" assumes an LSF system (on the kure/killdevil clusters)
+    * "longleaf" assumes a SLURM system (on the longleaf cluster)
+    * "local" assumes you're running it on your own computer
 
-    The cluster approach submits 100 separate jobs with 100 separate 
-    RNG initializations (if 100 simulations are requested, for example.)
+     The cluster approach submits 100 separate jobs with 100 separate 
+     RNG initializations (if 100 simulations are requested, for example.)
+
   3. Automatically creating folders and naming simulation files.
 
 Only the first few lines of batch_submit.py which contain 
