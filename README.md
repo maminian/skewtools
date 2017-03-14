@@ -107,18 +107,18 @@ integer if you go this route).
 use "batch_submit.py" to call one of the executables. 
 This allows for a few things:
 
-  1. Automatically running multiple simulations; i.e., 
-    running the same code multiple times with different 
-    seeds for the RNG
-  2. Running the code on one of UNC's clusters:
-    * "bsub" assumes an LSF system (on the kure/killdevil clusters)
-    * "longleaf" assumes a SLURM system (on the longleaf cluster)
-    * "local" assumes you're running it on your own computer
+1. Automatically running multiple simulations; i.e., 
+   running the same code multiple times with different 
+   seeds for the RNG
+2. Running the code on one of UNC's clusters:
+  * "bsub" assumes an LSF system (on the kure/killdevil clusters)
+  * "longleaf" assumes a SLURM system (on the longleaf cluster)
+  * "local" assumes you're running it on your own computer
 
-     The cluster approach submits 100 separate jobs with 100 separate 
-     RNG initializations (if 100 simulations are requested, for example.)
+The cluster approach submits 100 separate jobs with 100 separate 
+RNG initializations (if 100 simulations are requested, for example.)
 
-  3. Automatically creating folders and naming simulation files.
+3. Automatically creating folders and naming simulation files.
 
 Only the first few lines of batch_submit.py which contain 
 parameter values (filenames, switches, etc) should be changed.
