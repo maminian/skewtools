@@ -1,4 +1,4 @@
-README last updated: 14 March 2017
+**README last updated: 14 March 2017**
 
 This code has been written for my own use, so 
 work needs to be done to make it more modular,
@@ -21,7 +21,7 @@ appreciate any feedback or notes for
 your installation process.
 
 
-#Prerequisites for compiling and running the executables.
+## Prerequisites for compiling and running the executables.
 
 
 The simulation code is written entirely in Fortran 90, 
@@ -44,7 +44,7 @@ For all this, you need:
    the executable multiple times and/or on a cluster.
 
 
-#Prerequisites for analyzing the output of a simulation.
+## Prerequisites for analyzing the output of a simulation.
 
 
 In principle, here, you can use any tool that can 
@@ -60,7 +60,7 @@ then installing these via "pip install <package>".
  - ipython (recommended)
 
 
-#Compiling and running a test example.
+## Compiling and running a test example.
 
 
 Currently, the simulation executables are broken up by 
@@ -105,11 +105,13 @@ parameter values (filenames, switches, etc) should be changed.
 
 Once this is set up, start the simulation in the terminal with 
 
->python batch_submit.py
+```
+python batch_submit.py
+```
 
 If you run the job locally, you should see something like this:
 
-
+>
 >================================================================================
 > 
 >Geometry: channel
@@ -138,7 +140,7 @@ were processed correctly. A crude progress meter has been implemented
 and will update dynamically until the simulation is completed.
 
 
-#Examining the output of a test example.
+## Examining the output of a test example.
 
 Let's assume the simulation finished successfully, and the output 
 is written to output.h5. The scripts/ folder contains a large number of 
@@ -180,17 +182,18 @@ of = h5py.File('output.h5','r')
 of.keys()
 ```
 
-(**It is also possible to use the command-line tool h5dump that should 
- come with the hdf5-tools package. For example, running this at the terminal:
+*It is also possible to use the command-line tool h5dump that should 
+come with the hdf5-tools package. For example, running this at the terminal:
 
-     h5dump -H output.h5 
+```
+h5dump -H output.h5 
+```
 
- gives an [admittedly cryptic until you have experience with it] 
- output of all the arrays stored in the 
- file.
-)
+gives an [admittedly cryptic until you have experience with it] 
+output of all the arrays stored in the file.*
 
-#Contact.
+
+## Contact.
 
 
 If you have questions, don't hesitate to contact me via 
