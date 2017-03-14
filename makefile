@@ -1,7 +1,7 @@
-# Makefile for geometric skewness code.
-#
-# Manuchehr Aminian, September 2014
-
+# Makefile for skewtools
+# 
+# Last updated: March 2017
+# 
 
 # -----
 # Subdirectories. Make sure HOME is correct, in particular.
@@ -9,44 +9,38 @@
 HOME = $(shell pwd)
 UTILS = $(HOME)/utils
 COMPS = $(HOME)/computation
-DIRECT = $(HOME)/direct
 MONTE = $(HOME)/monte
 TEST = $(HOME)/test
 MODS = $(HOME)/modules
 
 # --------------
-# Fortran compiler, you _need_ to use h5fc (the hdf5 gfortran wrapper) if you want to use hdf5.
-# (You'll need to edit looper.f90 and remove the call to dSaveArrayToHDF otherwise.)
-#
-# If you modify the code appropriately (remove calls to dSaveArrayToHDF), gfortran should work fine.
+# Fortran compiler, you _need_ to use h5fc (the hdf5 fortran compiler wrapper), as 
+# all the i/o is done with hdf data containers.
+# 
 # ----------------------
 
 FC        = h5fc
-#FC        = gfortran
 
 # ---------
-# Link your BLAS library
+# Link your BLAS and LAPACK libraries.
+# Currently only BLAS is used, and for pulsatile (oscillatory) flow.
 # ----------------
-BLAS = -lblas
 
-# --------
-# Link your LAPACK library (necessary if you plan to use it for the eigenvalue problem)
-# ----------------
+BLAS = -lblas
 LAPACK = -llapack
 
 # -------
-# Miscellaneous flags. fbackslash allows for 'backspacing' in writes,
-# letting you have a dynamic progress bar (for instance).
+# Miscellaneous flags. fbackslash allows for 'backspacing' 
+# in writes (gfortran only), letting you have a dynamic 
+# progress bar (for instance).
 # ---------------
 
 OTHER2 = -fbackslash -fbounds-check -funroll-loops -O3
 
-
-# -fbounds-check -O3 -funroll-loops -Wall
-
 # Uncomment to enable profiling
-#OTHER = $(OTHER2) -pg
 OTHER = $(OTHER2)
+#OTHER = $(OTHER2) -pg
+
 
 CLEANUP = rm -f ./*.o ./*.mod
 
