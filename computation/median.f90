@@ -1,35 +1,39 @@
-subroutine median(n,x,median)
+subroutine median(n,x,med)
 ! Combination function to compute the median 
 ! of an array.
 !
-! Sort followed 
+! Done by using a generic sort on input array x
+! and returning the n/2 element (or average for n odd)
+!
 implicit none
      ! In/out
      integer, intent(in)                          :: n
-     double precision, dimension(1:n), intent(in) :: x
-     double precision, intent(out)                :: median
+     double precision, dimension(1:n), intent(in)   :: x
+     double precision, intent(out)                :: med
      
      ! Internal
      integer                            :: i
-     double precision                   :: temp
-     double precision, dimension(1:n)   :: xtemp
+     double precision, dimension(1:n)     :: xtemp
 
      ! Handle degenerate cases.
      if (n .eq. 0) then
-          median = 0.0d0
+          med = 0.0d0
      else if (n .eq. 1) then
-          median = x(1)
-     else
+          med = x(1)
+     end if
 
      ! Sort the array, store in xtemp
-     call mergesort(n,x,xtemp)
+     xtemp = x
+     call mergesort(n,1,n,xtemp)
      
      ! Take the n/2 element or the average of the two.
      i = int(n/2.0d0)
+     
+
      if (mod(n,2) .eq. 0) then
-          median = (xtemp(i) + xtemp(i+1))/2.0d0
+          med = (xtemp(i) + xtemp(i+1))/2.0d0
      else
-          median = xtemp(i)
+          med = xtemp(i+1)
      end if
           
-end subroutine moments
+end subroutine median

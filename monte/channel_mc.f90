@@ -37,7 +37,7 @@ implicit none
      double precision, dimension(:,:), allocatable     :: Xbuffer,Ybuffer
 
      integer(kind=i64)                                 :: bk,inext,rem
-     double precision, dimension(:), allocatable       :: means,vars,skews,kurts,t_hist
+     double precision, dimension(:), allocatable       :: means,vars,skews,kurts,medians,t_hist
      double precision, dimension(:,:), allocatable     :: hist_centers,hist_heights
 
      
@@ -69,11 +69,16 @@ implicit none
      ! Flags to save position histories and read IC from a file.
      logical                            :: check_ic_channel,robin
 
-     double precision u_channel_precomp
+     double precision u_channel
      
-
      ! Advection/diffusion functions!
-     external  :: impose_reflective_BC_rect_robin, impose_reflective_BC_rect, u_channel, u_channel_precomp
+     external  :: impose_reflective_BC_rect, u_channel
+     external  :: impose_reflective_BC_rect_robin
+
+
+     ! Specify geometry. (not so important)
+     geometry = "channel"
+
 
      ! TEMPORARY MANUAL PARAMETER
      !
@@ -159,7 +164,7 @@ implicit none
      end if
 
      ! Channel-averaged stats
-     allocate(means(ntt),vars(ntt),skews(ntt),kurts(ntt))
+     allocate(means(ntt),vars(ntt),skews(ntt),kurts(ntt),medians(ntt))
 
      ! Stats on slices
      if (.not. (nbins .eq. 0)) then
@@ -251,6 +256,8 @@ implicit none
 !                    kurts,nby,means_sl,vars_sl,skews_sl,kurts_sl)
      call accumulate_moments_1d(tt_idx,ntt,nTot,X,Y,a,means,vars,skews,&
                     kurts,nby,means_sl,vars_sl,skews_sl,kurts_sl)
+     call median(nTot,X,medians(tt_idx))
+
      call make_histogram(nTot,X,nhb,hist_centers(tt_idx,1:nhb),hist_heights(tt_idx,1:nhb))
 
      if (save_hist2d) then
@@ -289,7 +296,7 @@ implicit none
           if (use_oscillatory) then
                call update_flow(t)
                call apply_advdiff1_chan(nTot,X,Y,Pe,dt,a, &
-                              u_channel_precomp,impose_reflective_BC_rect)
+                              u_channel,impose_reflective_BC_rect)
           else
                !
                ! Primary timestep
@@ -325,6 +332,8 @@ implicit none
                     ! Update the statistics.
                     call accumulate_moments_1d(tt_idx,ntt,nTot,X,Y,a,means,vars,skews,&
                                    kurts,nby,means_sl,vars_sl,skews_sl,kurts_sl)
+                    call median(nTot,X,medians(tt_idx))
+
                     ! Update the histogram centers and heights.
                     call make_histogram(nTot,X,nhb,hist_centers(tt_idx,1:nhb),hist_heights(tt_idx,1:nhb))
 
@@ -337,6 +346,8 @@ implicit none
                          call accumulate_moments_1d(tt_idx,ntt,nactive,&
                                    Xtemp(1:nactive),Ytemp(1:nactive),a,means,vars,skews,&
                                    kurts,nby,means_sl,vars_sl,skews_sl,kurts_sl)
+                         call median(nTot,X,medians(tt_idx))
+
                          call make_histogram(nactive,Xtemp(1:nactive),nhb,&
                                         hist_centers(tt_idx,1:nhb),hist_heights(tt_idx,1:nhb))
 
@@ -417,7 +428,7 @@ implicit none
      ! Save all the remaining arrays. It's a lot of fluff so it's been 
      ! given its own subroutine.
 
-     call save_the_rest_channel(fname2,geometry,ntt,target_times,means,vars,skews,kurts,&
+     call save_the_rest_channel(fname2,geometry,ntt,target_times,means,vars,skews,kurts,medians,&
                     nby,means_sl,vars_sl,skews_sl,kurts_sl,nhb,hist_centers,hist_heights,&
                     Pe,nTot,mt_seed,dtmax,t_warmup)
 

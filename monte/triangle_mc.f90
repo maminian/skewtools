@@ -6,43 +6,44 @@ use mtmod
 use mod_time
 use mod_duration_estimator
 use mod_triangle_bdry
+use mod_parameters
 
 implicit none
 
      ! Array sizes, parameters, local vars
-     integer, parameter                                :: i64 = selected_int_kind(18)
+!     integer, parameter                                :: i64 = selected_int_kind(18)
      
-     integer                                           :: nGates
+!     integer                                           :: nGates
      integer                                           :: nTot,nt,kt,ny,nz,tt_idx
-     double precision                                  :: Tfinal,dt,dtmax,Pe,aratio,q,next_tt
+     double precision                                  :: next_tt
      double precision                                  :: t
      
-     integer(i64)                                      :: mt_seed
+!     integer(i64)                                      :: mt_seed
                                                             
 !     integer                                           :: maxrefl     
 
      ! Positions, position/statistic histories
-     integer                                           :: n_bins,nby,nbz,nhb
-     double precision                                  :: a,b,dby,dbz,t_warmup
-     double precision                                  :: y0,z0
+     integer                                           :: nby,nbz
+     double precision                                  :: b,dby,dbz
+!     double precision                                  :: y0,z0
 
-     double precision                                  :: x0width ! Longitudinal width of initial condition
-     integer                                           :: x0n     ! number of discretization points for x0width.
+!     double precision                                  :: x0width ! Longitudinal width of initial condition
+!     integer                                           :: x0n     ! number of discretization points for x0width.
      
      double precision, dimension(:), allocatable       :: X,Y,Z
      double precision, dimension(:,:), allocatable     :: Xbuffer,Ybuffer,Zbuffer
-     integer                                           :: buffer_len,bk,inext,rem
-     double precision, dimension(:), allocatable       :: means,vars,skews,kurts,t_hist
+     integer                                           :: bk,inext,rem
+     double precision, dimension(:), allocatable       :: means,vars,skews,kurts,medians,t_hist
      
      double precision, dimension(:,:,:), allocatable   :: means_sl,vars_sl,skews_sl,kurts_sl
      double precision, dimension(:,:), allocatable     :: hist_centers,hist_heights
 
 
      ! Type of geometry, only used to modify the output header.
-     character(len=1024)                               :: geometry
+!     character(len=1024)                               :: geometry
      
      ! i/o
-     character(len=1024)                               :: param_file,other_file,filename,tstep_type,ic_file
+     character(len=1024)                               :: param_file,filename
      character(len=1024)                               :: out_msg
      
      ! HDF
@@ -59,7 +60,7 @@ implicit none
      integer(hsize_t), dimension(2)                    :: data_dims
 
      ! Flags to save position histories and read IC from a file.
-     logical                            :: save_hist,use_external_ic
+!     logical                            :: save_hist,use_external_ic
      logical check_ic_duct
 
      ! References to functions that go in arguments.
@@ -68,7 +69,7 @@ implicit none
      ! Parameters.
      !
      
-     parameter(geometry = "triangle")
+     geometry = "triangle"
      
      ! Buffer length, to reduce the number of writes
      ! onto the HDF files.
@@ -82,10 +83,10 @@ implicit none
      !
      ! In our example kt = 1/(5*10**7). 
      ! 
-     parameter(buffer_len = 20)
+!     parameter(buffer_len = 20)
      
      ! Number of bins when looking at the cross-sectionally averaged distribution.
-     parameter(nhb = 400)
+!     parameter(nhb = 400)
 
      ! -------------------------------------------------------
 
@@ -94,8 +95,7 @@ implicit none
      call get_command_argument(1,param_file)
      call get_command_argument(2,filename)
 
-     call read_inputs_mc(param_file,aratio,q,Pe,nGates,x0n,x0width,y0,z0,save_hist,n_bins,t_warmup,&
-                              use_external_ic,ic_file,tstep_type,dt,dtmax,Tfinal,ntt,other_file,mt_seed)
+     call read_inputs_mc2(param_file)
      
      ! Ignore whatever was input and replace.
      aratio = 1.0d0
@@ -107,17 +107,17 @@ implicit none
      end if
 
      ! Set the dimensions of the thing.
-     a = 1.0d0
+!     a = 1.0d0
      
 	! Assign the number of bins in each direction for ptwise stats.
-     if (n_bins .eq. 0) then
+     if (nbins .eq. 0) then
           nby = 0
           nbz = 0
 
           dby = 0.0d0
           dbz = 0.0d0
      else
-          nby = n_bins
+          nby = nbins
           nbz = nby
           
           dby = (2.0d0*a)/nby
@@ -183,10 +183,10 @@ implicit none
      allocate(X(nTot), Y(nTot), Z(nTot))
 
      ! Channel-averaged stats
-     allocate(means(ntt), vars(ntt), skews(ntt),kurts(ntt))
+     allocate(means(ntt), vars(ntt), skews(ntt), kurts(ntt), medians(ntt))
 
      ! Stats on Y slices (integrated across Z)
-     if (.not. (n_bins .eq. 0)) then
+     if (.not. (nbins .eq. 0)) then
           allocate(means_sl(ntt,nby,nbz),vars_sl(ntt,nby,nbz),&
                     skews_sl(ntt,nby,nbz),kurts_sl(ntt,nby,nbz))
      end if
@@ -268,6 +268,7 @@ implicit none
      call accumulate_moments_2d(tt_idx,ntt,nTot,X,Y,Z, &
                -1.0d0,-1.0d0+2*a*dsqrt(3.0d0),-a*dsqrt(3.0d0),a*dsqrt(3.0d0), &
                means,vars,skews,kurts,nby,nbz,means_sl,vars_sl,skews_sl,kurts_sl)
+     call median(nTot,X,medians(tt_idx))
 
      call make_histogram(nTot,X,nhb,hist_centers(tt_idx,1:nhb),hist_heights(tt_idx,1:nhb))
      
@@ -315,7 +316,7 @@ implicit none
                call accumulate_moments_2d(tt_idx,ntt,nTot,X,Y,Z, &
                          -1.0d0,-1.0d0+a*3.0d0,-a*dsqrt(3.0d0),a*dsqrt(3.0d0), &
                          means,vars,skews,kurts,nby,nbz,means_sl,vars_sl,skews_sl,kurts_sl)
-
+               call median(nTot,X,medians(tt_idx))
                
                call make_histogram(nTot,X,nhb,hist_centers(tt_idx,1:nhb),hist_heights(tt_idx,1:nhb))
                
@@ -387,7 +388,7 @@ implicit none
      !
      ! The ellipse and duct implementations are identical again here, so no use making another subroutine.
      
-     call save_the_rest_duct(fname2,geometry,ntt,target_times,means,vars,skews,kurts,nby,nbz,&
+     call save_the_rest_duct(fname2,geometry,ntt,target_times,means,vars,skews,kurts,medians,nby,nbz,&
                               means_sl,vars_sl,skews_sl,kurts_sl,nhb,hist_centers,hist_heights,&
                               Pe,nTot,mt_seed,aratio,q,dtmax,t_warmup)
 
@@ -395,9 +396,9 @@ implicit none
      ! ------
      deallocate(X,Y,Z)
 
-     deallocate(means,vars,skews,kurts,target_times)
+     deallocate(means,vars,skews,kurts,medians,target_times)
      
-     if (.not. (n_bins .eq. 0)) then
+     if (.not. (nbins .eq. 0)) then
           deallocate(means_sl,vars_sl,skews_sl,kurts_sl)
      end if
      

@@ -87,7 +87,7 @@ ax.set_xlabel('Time')
 ax.set_ylabel('Skewness')
 ax.grid(True)
 
-#ax.set_xscale('log')
+ax.set_xscale('log')
 
 #if len(files)<5:
 #     pyplot.legend(loc='best')

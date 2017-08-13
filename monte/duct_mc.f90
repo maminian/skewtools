@@ -301,7 +301,11 @@ implicit none
      mde_ntt = nt-1
      allocate(mde_dts(mde_ntt))
      
-
+     if (.not. check_ic_duct(nTot,Y,Z,a,b)) then
+          write(*,*) "Part of the initial condition lies outside the domain. Exiting."
+          write(*,*) "moo1"
+          go to 1234
+     end if
      
      ! ---------------------------------
      !
@@ -320,7 +324,13 @@ implicit none
      !
      inext = 1
      tt_idx = 1
-     
+     if (.not. check_ic_duct(nTot,Y,Z,a,b)) then
+          write(*,*) "Part of the initial condition lies outside the domain. Exiting."
+!          write(*,*) "moo2"
+          go to 1234
+     end if
+
+
      call accumulate_moments_2d(tt_idx,ntt,nTot,X,Y,Z,-a,a,-b,b,means,vars,skews,&
                kurts,nby,nbz,means_sl,vars_sl,skews_sl,kurts_sl)
 
