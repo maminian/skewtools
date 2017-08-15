@@ -1,4 +1,4 @@
-**README last updated: 14 March 2017**
+**README last updated: 15 August 2017**
 
 ## Introduction.
 
