@@ -238,3 +238,7 @@ If you have questions, don't hesitate to contact me via
 email at manuchehr.aminian@gmail.com. Further tutorials to 
 demonstrate the capabilities of the code are planned for the future.
 
+## Relevant research publications
+- Aminian, M., Bernardi, F., Camassa, R., Harris, D., McLaughlin, R. “How boundaries shapechemical delivery in microfluidics”, Science, Vol. 354, Iss. 6317, 2016, pp. 1252-1256.
+- Aminian, M., Bernardi, F., Camassa, R., McLaughlin, R. “Squaring the circle: Geometric skewness and symmetry breaking for passive scalar transport in ducts and pipes”, Phys. Rev. Lett., Vol. 115, Iss. 15, 2015.
+
