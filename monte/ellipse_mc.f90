@@ -5,28 +5,22 @@ use HDF5
 use mtmod
 use mod_time
 use mod_duration_estimator
+use mod_parameters
 
 implicit none
 
      ! Array sizes, parameters, local vars
-     integer, parameter                                :: i64 = selected_int_kind(18)
      
-     integer                                           :: nGates
      integer                                           :: nTot,nt,kt,ny,nz,tt_idx
-     double precision                                  :: Tfinal,dt,dtmax,Pe,aratio,q,next_tt
+     double precision                                  :: next_tt
      double precision                                  :: t
      
-     integer(i64)                                      :: mt_seed
                                                             
      integer                                           :: maxrefl     
 
      ! Positions, position/statistic histories
-     integer                                           :: n_bins,nbx,nby,nbz,nhb
-     double precision                                  :: a,b,dby,dbz,t_warmup
-     double precision                                  :: y0,z0
-
-     double precision                                  :: x0width ! Longitudinal width of initial condition
-     integer                                           :: x0n     ! number of discretization points for x0width.
+     integer                                           :: nbx,nby,nbz
+     double precision                                  :: dby,dbz
 
 	 ! Stuff for 2d histogram looking into the short direction.
      double precision, dimension(:,:,:), allocatable   :: hist2d
@@ -35,18 +29,14 @@ implicit none
 	 
      double precision, dimension(:), allocatable       :: X,Y,Z
      double precision, dimension(:,:), allocatable     :: Xbuffer,Ybuffer,Zbuffer
-     integer                                           :: buffer_len,bk,inext,rem
-     double precision, dimension(:), allocatable       :: means,vars,skews,kurts,t_hist
+     integer                                           :: bk,inext,rem
+     double precision, dimension(:), allocatable       :: means,vars,skews,kurts,medians,t_hist
      
      double precision, dimension(:,:,:), allocatable   :: means_sl,vars_sl,skews_sl,kurts_sl
      double precision, dimension(:,:), allocatable     :: hist_centers,hist_heights
-
-
-     ! Type of geometry, only used to modify the output header.
-     character(len=1024)                               :: geometry
      
      ! i/o
-     character(len=1024)                               :: param_file,other_file,filename,tstep_type,ic_file
+     character(len=1024)                               :: param_file,filename
      character(len=1024)                               :: out_msg
 
 	 character(len=1024)                               :: arrayname,descr
@@ -64,37 +54,17 @@ implicit none
      
      integer(hsize_t), dimension(2)                    :: data_dims
 
-     ! For saving position histories and read IC from a file.
-     logical                            :: save_hist,save_hist2d,use_external_ic
-     
-
      ! References to functions that go in arguments.
      external  :: impose_reflective_BC_ellipse, u_ellipse
-     
+
+          
      ! Parameters.
      !
-     
-     parameter(geometry = "ellipse")
-     
-     ! Buffer length, to reduce the number of writes
-     ! onto the HDF files.
-     ! Make this as large as possible to fit in RAM!
-     !
-     ! 5*10**3 buff * 10**4 walks => ~1GB RAM
-     ! 
-     ! RAM = kt*buffer*walks
-     !    ..............=> buffer = RAM/(k*walks) 
-     !                     k = RAM/(buffer*walks)
-     !
-     ! In our example kt = 1/(5*10**7). 
-     ! 
-     parameter(buffer_len = 20)
-     
-     ! Number of bins when looking at the cross-sectionally averaged distribution.
-     parameter(nhb = 400)
 
      ! Maximum reflections applied before giving up and stopping the point on the boundary.
      parameter(maxrefl = 10)
+
+     geometry = "ellipse"
 
 	 ! -------------------------------------------------------
 
@@ -102,7 +72,7 @@ implicit none
      call get_command_argument(1,param_file)
      call get_command_argument(2,filename)
      
-     call read_inputs_mc(param_file,aratio,q,Pe,nGates,x0n,x0width,y0,z0,save_hist,n_bins,save_hist2d,t_warmup,&
+     call read_inputs_mc(param_file,aratio,q,Pe,nGates,x0n,x0width,y0,z0,save_hist,nbins,save_hist2d,t_warmup,&
                               use_external_ic,ic_file,tstep_type,dt,dtmax,Tfinal,ntt,other_file,mt_seed)
      
      if (filename=="") then
@@ -112,26 +82,25 @@ implicit none
      end if
 
      ! Set the dimensions of the thing.
-     a = 1.0d0
      b = a/aratio
      
 	! Assign the number of bins in each direction for ptwise stats.
-     if (n_bins .eq. 0) then
+     if (nbins .eq. 0) then
           nby = 0
           nbz = 0
 
           dby = 0.0d0
           dbz = 0.0d0
      else
-          nby = n_bins
-          nbz = ceiling(n_bins/aratio) ! Could also make this the same as nby.
+          nby = nbins
+          nbz = ceiling(nbins/aratio) ! Could also make this the same as nby.
           
           dby = (2.0d0*a)/nby
           dbz = (2.0d0*b)/nbz
      end if
 	 
 	 nbx = nby
-     write(*,*) n_bins,nbx,nby,nbz
+     write(*,*) nbins,nbx,nby,nbz
 	 
 	 
      !
@@ -196,10 +165,10 @@ implicit none
      allocate(X(nTot), Y(nTot), Z(nTot))
 
      ! Channel-averaged stats
-     allocate(means(ntt), vars(ntt), skews(ntt),kurts(ntt))
+     allocate(means(ntt), vars(ntt), skews(ntt),kurts(ntt),medians(ntt))
 	 
      ! Stats on Y slices (integrated across Z)
-     if (.not. (n_bins .eq. 0)) then
+     if (.not. (nbins .eq. 0)) then
           allocate(means_sl(ntt,nby,nbz),vars_sl(ntt,nby,nbz),&
                     skews_sl(ntt,nby,nbz),kurts_sl(ntt,nby,nbz))
      end if
@@ -287,6 +256,7 @@ implicit none
      
      call accumulate_moments_2d(tt_idx,ntt,nTot,X,Y,Z,-a,a,-b,b,means,vars,skews,&
                kurts,nby,nbz,means_sl,vars_sl,skews_sl,kurts_sl)
+     call median(nTot,X,medians(tt_idx))
 
      call make_histogram(nTot,X,nhb,hist_centers(tt_idx,1:nhb),hist_heights(tt_idx,1:nhb))
 
@@ -338,6 +308,7 @@ implicit none
 
                call accumulate_moments_2d(tt_idx,ntt,nTot,X,Y,Z,-a,a,-b,b,means,vars,skews,&
                          kurts,nby,nbz,means_sl,vars_sl,skews_sl,kurts_sl)
+               call median(nTot,X,medians(tt_idx))
 
                
                call make_histogram(nTot,X,nhb,hist_centers(tt_idx,1:nhb),hist_heights(tt_idx,1:nhb))
@@ -430,7 +401,7 @@ implicit none
      !
      ! The ellipse and duct implementations are identical again here, so no use making another subroutine.
      
-     call save_the_rest_duct(fname2,geometry,ntt,target_times,means,vars,skews,kurts,nby,nbz,&
+     call save_the_rest_duct(fname2,geometry,ntt,target_times,means,vars,skews,kurts,medians,nby,nbz,&
                               means_sl,vars_sl,skews_sl,kurts_sl,nhb,hist_centers,hist_heights,&
                               Pe,nTot,mt_seed,aratio,q,dtmax,t_warmup)
 
@@ -438,9 +409,9 @@ implicit none
      ! ------
      deallocate(X,Y,Z)
 
-     deallocate(means,vars,skews,kurts,target_times)
+     deallocate(means,vars,skews,kurts,medians,target_times)
      
-     if (.not. (n_bins .eq. 0)) then
+     if (.not. (nbins .eq. 0)) then
           deallocate(means_sl,vars_sl,skews_sl,kurts_sl)
      end if
      

@@ -12,26 +12,22 @@ use mod_parameters
 implicit none
 
      ! Array sizes, parameters, local vars
-!     integer, parameter                                :: i64 = selected_int_kind(18)
 
      integer                                           :: i
      
-!     integer                                           :: nGates,
      integer                                           :: nTot
      integer                                           :: mc_n,nt,kt,ny,nz,nr,tt_idx
 
      double precision                                  :: mcvar,next_tt
      double precision                                  :: t,uval,told
      
-!     integer(i64)                                        :: mt_seed
-
      
      ! Positions, position/statistic histories
      double precision                                  :: bin_lo,bin_hi,dby,dbz
      double precision, dimension(:), allocatable       :: X,Y,Z
      double precision, dimension(:,:), allocatable     :: Xbuffer,Ybuffer,Zbuffer
      integer                                           :: bk,inext,rem
-     double precision, dimension(:), allocatable       :: means,vars,skews,kurts,t_hist,X_bin
+     double precision, dimension(:), allocatable       :: means,vars,skews,kurts,medians,t_hist,X_bin
      double precision, dimension(:,:), allocatable     :: hist_centers,hist_heights
      
      double precision, dimension(:,:,:), allocatable   :: means_sl,vars_sl,skews_sl,kurts_sl
@@ -39,16 +35,11 @@ implicit none
      double precision, dimension(:,:), allocatable     :: W
      integer                                           :: nd,bin_count,kb,jb,nbx,nby,nbz
 
-!     double precision                                  :: x0width ! Longitudinal width of initial condition
-!     integer                                           :: x0n     ! number of discretization points for x0width.
-
-
      ! Stuff for 2d histogram looking into the short direction.
      double precision, dimension(:,:,:), allocatable   :: hist2d
      double precision, dimension(:,:), allocatable     :: hist2dcx, hist2dcy ! bin centers.
 
      ! Type of geometry, only used for filenames and things.
-!     character(len=1024)                               :: geometry
 
      ! i/o
      character(len=1024)                               :: param_file,filename
@@ -68,8 +59,6 @@ implicit none
      
      integer(hsize_t), dimension(2)     :: data_dims
      
-     ! Flags to save position histories and read IC from a file.
-!     logical                            :: save_hist,save_hist2d,use_external_ic
      logical check_ic_duct
      
 
@@ -83,28 +72,6 @@ implicit none
      nd=3
      
      geometry = "duct"
-     
-
-     ! Length of the buffer before writing to disk.
-     ! Only relevant if saving the entire position history.
-     ! Run time is bottlenecked by this to a severe degree, so in general 
-     ! this should be made as large as possible while still fitting in memory.
-     !
-     ! Some quick numbers; 5e3 buffer size with 1e4 walks
-     ! requires about 1GB RAM. So, you should choose the parameters
-     ! so that it works out.
-     !
-     ! RAM = kt*buffer*walks
-     !    ..............=> buffer = RAM/(k*walks) 
-     !                     k = RAM/(buffer*walks)
-     !
-     ! In our example kt = 1/(5*10**7). 
-     ! 
-!     buffer_len = 51
-
-     ! Number of bins when looking at the cross-sectionally averaged distribution.
-!     parameter(nhb = 400)
-
 
      ! -------------------------------------------------------
 
@@ -123,7 +90,6 @@ implicit none
      end if
      
      ! Set dimensions of the thing.
-!     a = 1.0d0
      b = a/aratio
 
 	 ! Assign the number of bins in each direction for ptwise stats.
@@ -171,9 +137,6 @@ implicit none
           ny = 1
           nz = 1
      end if
-!     ny = floor(dsqrt(dble(nGates)))+1
-!     nz = floor(dsqrt(dble(nGates)))+1
-
      
      ! If resolution is an issue, exit.
      if ( (ny .lt. 7) .and. (nGates .gt. 1) ) then
@@ -206,7 +169,7 @@ implicit none
      allocate(X(nTot), Y(nTot), Z(nTot))
 
      ! Cross-sectionally averaged stats.
-     allocate(means(ntt), vars(ntt), skews(ntt),kurts(ntt))
+     allocate(means(ntt), vars(ntt), skews(ntt),kurts(ntt),medians(ntt))
 
      ! Pointwise stats
      if (.not. (nbins .eq. 0)) then
@@ -333,6 +296,7 @@ implicit none
 
      call accumulate_moments_2d(tt_idx,ntt,nTot,X,Y,Z,-a,a,-b,b,means,vars,skews,&
                kurts,nby,nbz,means_sl,vars_sl,skews_sl,kurts_sl)
+     call median(nTot,X,medians(tt_idx))
 
      call make_histogram(nTot,X,nhb,hist_centers(tt_idx,1:nhb),hist_heights(tt_idx,1:nhb))
 
@@ -386,6 +350,7 @@ implicit none
 
                call accumulate_moments_2d(tt_idx,ntt,nTot,X,Y,Z,-a,a,-b,b,means,vars,skews,&
                          kurts,nby,nbz,means_sl,vars_sl,skews_sl,kurts_sl)
+               call median(nTot,X,medians(tt_idx))
 
                call make_histogram(nTot,X,nhb,hist_centers(tt_idx,1:nhb),hist_heights(tt_idx,1:nhb))
                
@@ -471,7 +436,7 @@ implicit none
      ! Save all the remaining arrays. It's a lot of fluff so it's been 
      ! given its own subroutine.
 
-     call save_the_rest_duct(fname2,geometry,ntt,target_times,means,vars,skews,kurts,nby,nbz,&
+     call save_the_rest_duct(fname2,geometry,ntt,target_times,means,vars,skews,kurts,medians,nby,nbz,&
                               means_sl,vars_sl,skews_sl,kurts_sl,nhb,hist_centers,hist_heights,&
                               Pe,nTot,mt_seed,aratio,q,dtmax,t_warmup)
 
@@ -480,7 +445,7 @@ implicit none
      ! ------
      deallocate(X,Y,Z)
 
-     deallocate(means,vars,skews,kurts,target_times)
+     deallocate(means,vars,skews,kurts,medians,target_times)
      if (.not. (nbins .eq. 0)) then
           deallocate(means_sl,vars_sl,skews_sl,kurts_sl)
      end if

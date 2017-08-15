@@ -551,7 +551,7 @@ def c1_channel(t,y,Pe=10.**4,nmax=1000,cutoff=10.**-2):
                c1 = zeros( len(y) )
                
                for k in range(1,nmax):
-#                    print k,(-1)**k/((k*pi)**4)*exp(-(k*pi)**2*t)
+#                    print(k,(-1)**k/((k*pi)**4)*exp(-(k*pi)**2*t))
                     c1 += (-1)**k/((k*pi)**4)*exp(-(k*pi)**2*t)*cos(k*pi*y)
                # end for
                c1 *= 4.
@@ -622,14 +622,13 @@ def c2_channel(t,y,Pe=10.**4,nmax=1000,cutoff=10.**-2):
                #
                c2 += chanQ1(t,y)
           else:
-               print 'what'
-               print 
+               print('what')
                c2 += 0.
           #
           c2 *= Pe**2
           c2 += 2*t
      else:
-          print 'what'
+          print('what')
           c2 = zeros( (len(y),len(t)) )
           
           for j in range(cidx,len(t)):

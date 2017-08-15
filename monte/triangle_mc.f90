@@ -11,7 +11,6 @@ use mod_parameters
 implicit none
 
      ! Array sizes, parameters, local vars
-!     integer, parameter                                :: i64 = selected_int_kind(18)
      
 !     integer                                           :: nGates
      integer                                           :: nTot,nt,kt,ny,nz,tt_idx
@@ -25,11 +24,7 @@ implicit none
      ! Positions, position/statistic histories
      integer                                           :: nby,nbz
      double precision                                  :: b,dby,dbz
-!     double precision                                  :: y0,z0
 
-!     double precision                                  :: x0width ! Longitudinal width of initial condition
-!     integer                                           :: x0n     ! number of discretization points for x0width.
-     
      double precision, dimension(:), allocatable       :: X,Y,Z
      double precision, dimension(:,:), allocatable     :: Xbuffer,Ybuffer,Zbuffer
      integer                                           :: bk,inext,rem
@@ -38,10 +33,6 @@ implicit none
      double precision, dimension(:,:,:), allocatable   :: means_sl,vars_sl,skews_sl,kurts_sl
      double precision, dimension(:,:), allocatable     :: hist_centers,hist_heights
 
-
-     ! Type of geometry, only used to modify the output header.
-!     character(len=1024)                               :: geometry
-     
      ! i/o
      character(len=1024)                               :: param_file,filename
      character(len=1024)                               :: out_msg
@@ -59,8 +50,6 @@ implicit none
      
      integer(hsize_t), dimension(2)                    :: data_dims
 
-     ! Flags to save position histories and read IC from a file.
-!     logical                            :: save_hist,use_external_ic
      logical check_ic_duct
 
      ! References to functions that go in arguments.
@@ -70,23 +59,6 @@ implicit none
      !
      
      geometry = "triangle"
-     
-     ! Buffer length, to reduce the number of writes
-     ! onto the HDF files.
-     ! Make this as large as possible to fit in RAM!
-     !
-     ! 5*10**3 buff * 10**4 walks => ~1GB RAM
-     ! 
-     ! RAM = kt*buffer*walks
-     !    ..............=> buffer = RAM/(k*walks) 
-     !                     k = RAM/(buffer*walks)
-     !
-     ! In our example kt = 1/(5*10**7). 
-     ! 
-!     parameter(buffer_len = 20)
-     
-     ! Number of bins when looking at the cross-sectionally averaged distribution.
-!     parameter(nhb = 400)
 
      ! -------------------------------------------------------
 
@@ -105,9 +77,6 @@ implicit none
           call duct_mc_messages(out_msg,nz)
           go to 1234
      end if
-
-     ! Set the dimensions of the thing.
-!     a = 1.0d0
      
 	! Assign the number of bins in each direction for ptwise stats.
      if (nbins .eq. 0) then
