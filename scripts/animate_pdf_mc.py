@@ -88,7 +88,7 @@ def find_median(hght,centers):
 
 walks = {};
 
-print "Reading data..."
+print("Reading data...")
 
 #
 # For simulations with position histories, 
@@ -108,7 +108,7 @@ Pe = walks['Peclet'].value
 
 walks.close()
      
-print "Constructing animation..."
+print("Constructing animation...")
 fps = 24
 ani = animate_hist(hist_centers,hist_heights,t,avsk)
 
@@ -119,5 +119,5 @@ ani.save('conc_pdf_%.2f.mp4'%okska,dpi=240,fps=12)
 
 pyplot.show(block=False)
 
-print "Done."
+print("Done.")
 
