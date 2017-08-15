@@ -1,8 +1,4 @@
-# Automate running batches of simulations,
-# based on where they are being run
-# (local computer, or UNC's kure/killdevil,
-# or UNC's longleaf).
-#
+# Script to execute a single execute locally.
 #
 
 import subprocess,os
@@ -16,17 +12,17 @@ execute = "local"   # if "local" then run directly, sequentially.
                     # "bsub" submits jobs to Kure/Killdevil.
                     # "longleaf" submits jobs to Longleaf.
 
-n = 1               # number of trials to run.
-fname_prefix = "c_test_"
-parent = "./temp/"
-sim_folder = ""
+n = 10               # number of trials to run.
+fname_prefix = "rectangle_"
+parent = "./ngons/"
+sim_folder = "rectangle/"
 
-exe_loc = "./channel_mc"
+exe_loc = "./duct_mc"
 
 # ------------------
 # More bsub options
 
-memoryreq = 8	# memory requirement in GB
+memoryreq = 16384	# in MB
 queue = "week"
 
 # ---------------------------
@@ -87,6 +83,17 @@ for i in range(n):
      process_parameter_file(param_loc,i)        
 # end if
 
+# Check if the appropriate out/ and err/ folders 
+# exist; if not, make them.
+stdoutfolder = folder+"out/"
+stderrfolder = folder+"err/"
+if not os.path.exists(stdoutfolder):
+     os.makedirs(stdoutfolder)
+#
+if not os.path.exists(stderrfolder):
+     os.makedirs(stderrfolder)
+#
+
 # Running simulations after the files are created.
 for i in range(n):
 
@@ -96,7 +103,7 @@ for i in range(n):
      out_loc = file_prefix+stridx+out_suffix
      
      if (execute=="bsub"):
-          bsub_prefix = ["bsub","-n","1","-o",parent+"out/"+"out."+stridx,"-e",parent+"err/"+"err."+stridx]
+          bsub_prefix = ["bsub","-n","1","-o",folder+"out/"+"out."+stridx,"-e",folder+"err/"+"err."+stridx]
 
           if (queue == "week"):
                more = ["-q",queue]
@@ -112,7 +119,7 @@ for i in range(n):
 
           command = exe_command
      elif (execute=="longleaf"):
-          longleaf_prefix = ["sbatch","-n","1","-o",parent+"out/"+"out."+stridx,"-e",parent+"err/"+"err."+stridx]
+          longleaf_prefix = ["sbatch","-n","1","-o",folder+"out/"+"out."+stridx,"-e",folder+"err/"+"err."+stridx]
 
           if (queue == "day"):
                tlimit = ["-t","%i:00"%(24,)]
@@ -128,7 +135,7 @@ for i in range(n):
 #          exe_command = ["--wrap","=",exe_loc,param_loc,out_loc]
 
           command = longleaf_prefix + tlimit + mem + exe_command
-          print command
+#          print command
      else:
           print "Unrecognized platform; \"execute\" must be one of \"local\", \"bsub\", or \"longleaf\"."
      # end if
