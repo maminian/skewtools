@@ -7,39 +7,40 @@ use mod_time
 use mod_duration_estimator
 use mod_ductflow
 use mod_readbuff
+use mod_parameters
 
 implicit none
 
      ! Array sizes, parameters, local vars
-     integer, parameter                                :: i64 = selected_int_kind(18)
+!     integer, parameter                                :: i64 = selected_int_kind(18)
 
      integer                                           :: i
      
-     integer                                           :: nGates,nTot
-     integer                                           :: mc_n,nt,kt,&
-                                                            ny,nz,nr,tt_idx
+!     integer                                           :: nGates,
+     integer                                           :: nTot
+     integer                                           :: mc_n,nt,kt,ny,nz,nr,tt_idx
 
-     double precision                                  :: Tfinal,dt,dtmax,Pe,mcvar,aratio,q,next_tt
+     double precision                                  :: mcvar,next_tt
      double precision                                  :: t,uval,told
      
-     integer(i64)                                        :: mt_seed
+!     integer(i64)                                        :: mt_seed
 
      
      ! Positions, position/statistic histories
-     double precision                                  :: a,b,bin_lo,bin_hi,dby,dbz,y0,z0,t_warmup
+     double precision                                  :: bin_lo,bin_hi,dby,dbz
      double precision, dimension(:), allocatable       :: X,Y,Z
      double precision, dimension(:,:), allocatable     :: Xbuffer,Ybuffer,Zbuffer
-     integer                                           :: buffer_len,bk,inext,rem
+     integer                                           :: bk,inext,rem
      double precision, dimension(:), allocatable       :: means,vars,skews,kurts,t_hist,X_bin
      double precision, dimension(:,:), allocatable     :: hist_centers,hist_heights
      
      double precision, dimension(:,:,:), allocatable   :: means_sl,vars_sl,skews_sl,kurts_sl
 
      double precision, dimension(:,:), allocatable     :: W
-     integer                                           :: nd,bin_count,kb,jb,n_bins,nbx,nby,nbz,nhb
+     integer                                           :: nd,bin_count,kb,jb,nbx,nby,nbz
 
-     double precision                                  :: x0width ! Longitudinal width of initial condition
-     integer                                           :: x0n     ! number of discretization points for x0width.
+!     double precision                                  :: x0width ! Longitudinal width of initial condition
+!     integer                                           :: x0n     ! number of discretization points for x0width.
 
 
      ! Stuff for 2d histogram looking into the short direction.
@@ -47,11 +48,10 @@ implicit none
      double precision, dimension(:,:), allocatable     :: hist2dcx, hist2dcy ! bin centers.
 
      ! Type of geometry, only used for filenames and things.
-     character(len=1024)                               :: geometry
+!     character(len=1024)                               :: geometry
 
      ! i/o
-     character(len=1024)                               :: param_file,&
-                                                            other_file,filename,tstep_type,ic_file
+     character(len=1024)                               :: param_file,filename
      character(len=1024)                               :: out_msg
      
      character(len=1024)                               :: arrayname,descr
@@ -69,7 +69,7 @@ implicit none
      integer(hsize_t), dimension(2)     :: data_dims
      
      ! Flags to save position histories and read IC from a file.
-     logical                            :: save_hist,save_hist2d,use_external_ic
+!     logical                            :: save_hist,save_hist2d,use_external_ic
      logical check_ic_duct
      
 
@@ -80,9 +80,9 @@ implicit none
      ! Internal parameters that you might want to change at some point.
      
      ! Number of physical dimensions. No reason to change this.
-     parameter(nd=3)
+     nd=3
      
-     parameter(geometry = "duct")
+     geometry = "duct"
      
 
      ! Length of the buffer before writing to disk.
@@ -100,10 +100,10 @@ implicit none
      !
      ! In our example kt = 1/(5*10**7). 
      ! 
-     parameter(buffer_len = 51)
+!     buffer_len = 51
 
      ! Number of bins when looking at the cross-sectionally averaged distribution.
-     parameter(nhb = 400)
+!     parameter(nhb = 400)
 
 
      ! -------------------------------------------------------
@@ -112,7 +112,7 @@ implicit none
      call get_command_argument(1,param_file)
      call get_command_argument(2,filename)
      
-     call read_inputs_mc(param_file,aratio,q,Pe,nGates,x0n,x0width,y0,z0,save_hist,n_bins,save_hist2d,t_warmup,&
+     call read_inputs_mc(param_file,aratio,q,Pe,nGates,x0n,x0width,y0,z0,save_hist,nbins,save_hist2d,t_warmup,&
                               use_external_ic,ic_file,tstep_type,dt,dtmax,Tfinal,ntt,other_file,mt_seed)
 
 
@@ -123,19 +123,19 @@ implicit none
      end if
      
      ! Set dimensions of the thing.
-     a = 1.0d0
+!     a = 1.0d0
      b = a/aratio
 
 	 ! Assign the number of bins in each direction for ptwise stats.
-     if (n_bins .eq. 0) then
+     if (nbins .eq. 0) then
           nby = 0
           nbz = 0
 
           dby = 0.0d0
           dbz = 0.0d0
      else
-	     nby = n_bins
-	     nbz = ceiling(n_bins/aratio) ! Could also make this the same as nby.
+	     nby = nbins
+	     nbz = ceiling(nbins/aratio) ! Could also make this the same as nby.
 
           dby = (2.0d0*a)/nby
           dbz = (2.0d0*b)/nbz
@@ -209,7 +209,7 @@ implicit none
      allocate(means(ntt), vars(ntt), skews(ntt),kurts(ntt))
 
      ! Pointwise stats
-     if (.not. (n_bins .eq. 0)) then
+     if (.not. (nbins .eq. 0)) then
           allocate(means_sl(ntt,nby,nbz),vars_sl(ntt,nby,nbz),&
                     skews_sl(ntt,nby,nbz),kurts_sl(ntt,nby,nbz))
      end if
@@ -481,7 +481,7 @@ implicit none
      deallocate(X,Y,Z)
 
      deallocate(means,vars,skews,kurts,target_times)
-     if (.not. (n_bins .eq. 0)) then
+     if (.not. (nbins .eq. 0)) then
           deallocate(means_sl,vars_sl,skews_sl,kurts_sl)
      end if
      deallocate(hist_centers,hist_heights)

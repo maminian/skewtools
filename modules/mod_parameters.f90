@@ -21,6 +21,7 @@ module mod_parameters
 
      ! Scale of the channel: [-a,a]. Not much reason to use anything other than 1.0d0.
      double precision, parameter        :: a = 1.0d0
+     double precision                   :: b
      character(len=1024)                :: geometry
      
      ! These will be read from file.
