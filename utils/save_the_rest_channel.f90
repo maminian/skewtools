@@ -1,4 +1,4 @@
-subroutine save_the_rest_channel(fname,geometry,ntt,target_times,means,vars,skews,kurts,n_bins,&
+subroutine save_the_rest_channel(fname,geometry,ntt,target_times,means,vars,skews,kurts,medians,n_bins,&
                               means_sl,vars_sl,skews_sl,kurts_sl,nhb,hist_centers,hist_heights,&
                               Pe,nGates,x0n,x0width,mt_seed)
 ! Saves the remainder of the calculated data (moments, problem parameters, solver settings, 
@@ -11,7 +11,7 @@ implicit none
      character(len=1024), intent(in)                             :: fname,geometry
      character(len=1024)                                         :: dsetname, descr
      integer, intent(in)                                         :: ntt, n_bins, nGates, x0n, nhb
-     double precision, dimension(1:ntt), intent(in)              :: target_times,means,vars,skews,kurts
+     double precision, dimension(1:ntt), intent(in)              :: target_times,means,vars,skews,kurts,medians
      double precision, dimension(1:ntt,1:n_bins), intent(in)     :: means_sl,vars_sl,skews_sl,kurts_sl
      double precision, dimension(1:ntt,1:nhb), intent(in)        :: hist_centers,hist_heights
      double precision, intent(in)                                :: Pe, x0width
@@ -41,20 +41,24 @@ implicit none
 
      
      dsetname = "Avgd_Mean"
-     descr = "Cross-section averaged mean for Nwalkers particles, in X direction."
+     descr = "Cross-section averaged mean for nTot particles, in X direction."
      call hdf_add_1d_darray_to_file(ntt,means,fname,dsetname,descr)
 
      dsetname = "Avgd_Variance"
-     descr = "Cross-section averaged variance for Nwalkers particles, in X direction."
+     descr = "Cross-section averaged variance for nTot particles, in X direction."
      call hdf_add_1d_darray_to_file(ntt,vars,fname,dsetname,descr)
      
      dsetname = "Avgd_Skewness"
-     descr = "Cross-section averaged skewness for Nwalkers particles, in X direction."
+     descr = "Cross-section averaged skewness for nTot particles, in X direction."
      call hdf_add_1d_darray_to_file(ntt,skews,fname,dsetname,descr)
 	 
      dsetname = "Avgd_Kurtosis"
-     descr = "Cross-section averaged kurtosis for Nwalkers particles, in X direction."
+     descr = "Cross-section averaged kurtosis for nTot particles, in X direction."
      call hdf_add_1d_darray_to_file(ntt,kurts,fname,dsetname,descr)
+
+     dsetname = "Avgd_Median"
+     descr = "Cross-section averaged median for nTot particles, in X direction."
+     call hdf_add_1d_darray_to_file(ntt,medians,fname,dsetname,descr)
      
      if (.not. (n_bins .eq. 0)) then
           
@@ -63,19 +67,19 @@ implicit none
           call hdf_add_1d_darray_to_file(1,dble(n_bins),fname,dsetname,descr)
           
           dsetname = "Mean"
-          descr = "Mean on slices for Nwalkers particles, in X direction."
+          descr = "Mean on slices for nTot particles, in X direction."
           call hdf_add_2d_darray_to_file(ntt,n_bins,means_sl,fname,dsetname,descr)
           
           dsetname = "Variance"
-          descr = "Variance on slices for Nwalkers particles, in X direction."
+          descr = "Variance on slices for nTot particles, in X direction."
           call hdf_add_2d_darray_to_file(ntt,n_bins,vars_sl,fname,dsetname,descr)
 
           dsetname = "Skewness"
-          descr = "Skewness on slices for Nwalkers particles, in X direction."
+          descr = "Skewness on slices for nTot particles, in X direction."
           call hdf_add_2d_darray_to_file(ntt,n_bins,skews_sl,fname,dsetname,descr)
 
           dsetname = "Kurtosis"
-          descr = "Kurtosis on slices for Nwalkers particles, in X direction."
+          descr = "Kurtosis on slices for nTot particles, in X direction."
           call hdf_add_2d_darray_to_file(ntt,n_bins,kurts_sl,fname,dsetname,descr)
      
      end if

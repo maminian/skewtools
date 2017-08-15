@@ -51,7 +51,12 @@ CLEANUP = rm -f ./*.o ./*.mod
 LINKS   = $(BLAS)
 
 # exe names, object names.
-EXES = rect_duct rootfinder cchoose_test rng_tester sortpairs_tester duct_mc channel_mc dump_uduct_flow dump_utriangle_flow hdf_test1 ellipse_mc triangle_mc racetrack_mc channel_moments_exact pipe_skew_exact duct_skew_exact duct_mc_alt largepe_root dump_uduct_flow_ss duct_keff triangle_mc duct_chatwin_keff h5_1d_rw_test lltest
+EXES_MC = channel_mc duct_mc ellipse_mc triangle_mc racetrack_mc
+EXES_DIRECT = rect_duct rootfinder duct_keff duct_chatwin_keff
+EXES_COMPS = dump_uduct_flow dump_utriangle_flow channel_moments_exact pipe_skew_exact duct_skew_exact largepe_root dump_uduct_flow_ss
+EXES_TEST = cchoose_test rng_tester sortpairs_tester hdf_test1 h5_1d_rw_test lltest mergesort_test median_test
+
+EXES = $(EXES_MC) $(EXES_DIRECT) $(EXES_COMPS) $(EXES_TEST)
 
 rect_duct: $(DIRECT)/rect_duct.f90
 	$(FC) $(MODS)/*.f90 $(UTILS)/*.f90 $(COMPS)/*.f90 -o $@ $(DIRECT)/$@.f90 $(LINKS) $(OTHER)
@@ -147,6 +152,14 @@ h5_1d_rw_test: $(TEST)/h5_1d_rw_test.f90
 
 lltest: $(TEST)/lltest.f90
 	$(FC) $(MODS)/mtfort90.f90 -o $@ $(TEST)/$@.f90 $(LINKS) $(OTHER)
+	$(CLEANUP)
+
+mergesort_test: $(TEST)/mergesort_test.f90
+	$(FC) $(MODS)/mtfort90.f90 $(UTILS)/my_normal_rng.f90 $(UTILS)/mergesort.f90 $(TEST)/$@.f90 -o $@ $(LINKS) $(OTHER)
+	$(CLEANUP)
+
+median_test: $(TEST)/median_test.f90
+	$(FC) $(MODS)/mtfort90.f90 $(UTILS)/my_normal_rng.f90 $(UTILS)/mergesort.f90 $(COMPS)/median.f90 $(TEST)/$@.f90 -o $@ $(LINKS) $(OTHER)
 	$(CLEANUP)
 
 clean:

@@ -24,6 +24,7 @@ implicit none
      integer, dimension(nTot)                                         :: Yidx,Zidx,bin_idxs
 
      double precision bdistfun_rt
+     logical check_ic_duct
 
      nbins = nby*nbz
      
@@ -47,19 +48,24 @@ implicit none
      ! Calculate all the moments. 
      !
 
+
      call moments(nTot,X,means(tt_idx),vars(tt_idx),skews(tt_idx),kurts(tt_idx))
      
      !
      ! Next, moments across (y,z) bins.
      !
 
-     if (nby .gt. 0) then
+     if (nby .gt. 1) then
           ! Start by binning independently in Y and Z.
           ! Enumerate the array of bins from 1,...,nby*nbz in the usual way.
           call uniform_bins_idx(nTot,Y,yl,yr,nby,Yidx)
           call uniform_bins_idx(nTot,Z,zl,zr,nbz,Zidx)
+
+     
+
           
           bin_idxs = Yidx + (nby-1)*(Zidx-1) + 1
+          write(*,*) minval(bin_idxs),maxval(bin_idxs),1,nby*nbz
           do i=1,nTot
                if ((bin_idxs(i) .lt. 1) .or. (bin_idxs(i) .gt. nby*nbz)) then
                     write(*,*) 
@@ -67,7 +73,7 @@ implicit none
                     write(*,*) i,Y(i),Z(i),bdistfun_rt(Y(i),Z(i),0.5d0,0.2d0)
                     write(*,*) bin_idxs(i),nby*nbz
                     write(*,*) minval(bin_idxs),maxval(bin_idxs)
-!                    read(*,*) 
+                    read(*,*) 
                end if
           end do
           ! Now sort the list of X positions based on their bin index.

@@ -11,13 +11,33 @@ as a part of my PhD dissertation work,
 but it is in the process of being generalized 
 enough to handle a variety of different situations. 
 
-A "passive tracer" (or passive scalar) is solute, 
-pollutant, etc, which doesn't influence the fluid flow 
-that is carrying it. In my case, I am interested 
-in the behavior of the tracer itself, but 
-if one was worried about an inverse problem, 
-they might try to infer things about the flow 
-field from the motion of the tracer.
+A passive tracer is a solute, 
+pollutant, field of particles, or otherwise, 
+which is carried by a fluid flow, 
+but doesn't influence the actual flow behavior. 
+While in principle this never occurs, it is 
+a very reasonable assumption for many situations, 
+as long as the bulk density or temperature 
+of the fluid doesn't change noticeably (which 
+would affect the flow) and the particles are 
+sufficiently small relative to the length scales 
+of interest.
+
+This project is primarily interested in the 
+behavior of the tracer itself; 
+how its statistics (mean, median, skewness) 
+change in time, and how they depend on the 
+type of pipe flow they are carried by. In this 
+case, the laminar flow field is found 
+beforehand, then simulations are run by 
+releasing a large number of particles, and 
+allowing them to diffuse and be carried by the fluid.
+
+The simulations are done using a Monte Carlo method, 
+which essentially drops many (on the order of millions to 
+billions) of particles, allowing them to diffuse and 
+be carried by the flow, and studies their 
+collective statistics throughout.
 
 This code was written mainly for my own use, so 
 work needs to be done to make it more modular,
@@ -115,8 +135,8 @@ This allows for a few things:
   * "longleaf" assumes a SLURM system (on the longleaf cluster)
   * "local" assumes you're running it on your own computer
 
-The cluster approach submits 100 separate jobs with 100 separate 
-RNG initializations (if 100 simulations are requested, for example.)
+  The cluster approach submits N separate jobs, with different 
+  initializations of the seed
 
 3. Automatically creating folders and naming simulation files.
 
@@ -168,7 +188,7 @@ scripts for visualizing the moments of the statistics.
 These are mostly "one-purpose-only" scripts, unfortunately, and require 
 editing depending on your needs. 
 
-However, in particular, the skewtools.py file contains a large number of 
+The main exception to this is the skewtools.py file, which has a large number of 
 functions which are used commonly for our purposes. These 
 include things such as collecting a common subset of data from a 
 large number of data files, averaging data, interpolation and comparison 
@@ -202,14 +222,13 @@ of = h5py.File('output.h5','r')
 of.keys()
 ```
 
-* It is also possible to use the command-line tool h5dump that should come with the hdf5-tools package. For example, running this at the terminal: *
+It is also possible to use the command-line tool h5dump that should come with the hdf5-tools package. For example, running this at the terminal:
 
 ```
 h5dump -H output.h5 
 ```
 
-* gives a (relatively cryptic) 
-output of all the arrays stored in the file. *
+gives a (relatively cryptic) output of all the arrays stored in the file.
 
 
 ## Contact.

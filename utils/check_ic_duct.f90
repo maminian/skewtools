@@ -15,6 +15,7 @@ implicit none
      zmin = minval(Z)
      zmax = maxval(Z)
 
+
      if ((ymin .lt. -a) .or. (ymax .gt. a) .or. (zmin .lt. -b) .or. (zmax .gt. b)) then
           check_ic_duct = .false.
           write(*,*) ymin,ymax,a

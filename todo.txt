@@ -1,0 +1,7 @@
+todo (last updated 13 August 2017):
+
+1. Update duct/racetrack/ellipse with median stuff
+2. Set up code to write to 6
+3. Clean up robin/pulsatile/normal mess on channel (think about modular stuff)
+4. ...
+
