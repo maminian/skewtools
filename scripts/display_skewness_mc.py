@@ -15,7 +15,7 @@ import skewtools
 # Read the input arguments as a list of files to pull data from.
 # Then pull the information from each of those files.
 
-print sys.argv
+print(sys.argv)
 
 if len(sys.argv) == 2:
      if (type(sys.argv[1]) == str):
@@ -23,14 +23,14 @@ if len(sys.argv) == 2:
      elif (type(sys.argv[1]) == list):
           files = sys.argv[1]
      else:
-          print "Unrecognized input."
+          print("Unrecognized input.")
      # end if
 else:
      files = sys.argv[1:]
 # end if
 
 files.sort()
-print files
+print(files)
 
 skews = skewtools.gatherDataFromFiles(files,'Avgd_Skewness')
 
@@ -87,7 +87,7 @@ ax.set_xlabel('Time')
 ax.set_ylabel('Skewness')
 ax.grid(True)
 
-#ax.set_xscale('log')
+ax.set_xscale('log')
 
 #if len(files)<5:
 #     pyplot.legend(loc='best')
