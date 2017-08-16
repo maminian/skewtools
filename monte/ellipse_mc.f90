@@ -98,11 +98,9 @@ implicit none
           dby = (2.0d0*a)/nby
           dbz = (2.0d0*b)/nbz
      end if
-	 
-	 nbx = nby
-     write(*,*) nbins,nbx,nby,nbz
-	 
-	 
+     
+     nbx = nby
+     
      !
      ! Generate the target times; times at which output is saved.
      ! Internal timestepping is created after.
