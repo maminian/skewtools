@@ -6,6 +6,31 @@ from os.path import isfile,join
 import h5py
 from matplotlib import pyplot
 
+def remove_ticks(myax):
+    '''
+    remove_ticks(myax)
+    
+    Given an axis handle, removes the tick marks and labels
+    on both x and y axes.
+    '''
+    myax.set_xticks([])
+    myax.set_yticks([])
+    myax.set_xticklabels([])
+    myax.set_yticklabels([])
+#
+
+def remove_spines(myax):
+    '''
+    remove_ticks(myax)
+    
+    Given an axis handle, removes the spines on the axis.
+    '''
+    myax.spines['left'].set_visible(False)
+    myax.spines['right'].set_visible(False)
+    myax.spines['bottom'].set_visible(False)
+    myax.spines['top'].set_visible(False)
+#
+
 def meanLine(data):
 # Takes a list of 1d arrays in and returns their pointwise average.
      
