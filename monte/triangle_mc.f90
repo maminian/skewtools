@@ -23,7 +23,7 @@ implicit none
 
      ! Positions, position/statistic histories
      integer                                           :: nby,nbz
-     double precision                                  :: b,dby,dbz
+     double precision                                  :: dby,dbz
 
      double precision, dimension(:), allocatable       :: X,Y,Z
      double precision, dimension(:,:), allocatable     :: Xbuffer,Ybuffer,Zbuffer
