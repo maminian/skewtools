@@ -75,24 +75,42 @@ def stdLines(data,nstdev):
      
 # end def
 
-def averageDataFromFiles(file_list,fname,key_list=['Mean','Variance','Skewness','Kurtosis','Avgd_Mean','Avgd_Variance','Avgd_Skewness','Avgd_Kurtosis','Hist_centers','Hist_heights']):
+def averageDataFromFiles(file_list,fname,key_list=None):
 # Takes a list of h5 files (for example, from generateH5FileList)
 # and a list of keys, and averages across the keys specified.
 # All other fields in the h5 file are assumed to be identical across 
-# the entire file list, 
-# and are copied over only from the first file in file_list.
+# the entire file list, and are copied over only from the first file in file_list.
 #
 # The result is saved in a new h5 file given by fname.
 # (include the .h5).
 #
 # Unfortunately this can only save in the current directory for now.
+#
+# Default keys to average over:
+# 
+# Mean
+# Variance
+# Skewness
+# Kurtosis
+# Averaged Mean
+# Averaged Variance
+# Averaged Skewness
+# Averaged Kurtosis
+# Averaged Median
+# Hist_centers
+# Hist_heights
+#
      
      out_file = h5py.File(fname,'w')
      
      # Save relevant datasets and initialize the array to be averaged.
      fref = h5py.File(file_list[0],'r')
      to_avg = {}
-          
+     
+     if (key_list == None):
+          key_list=['Mean','Variance','Skewness','Kurtosis','Avgd_Mean','Avgd_Variance','Avgd_Skewness','Avgd_Kurtosis','Avgd_Median','Hist_centers','Hist_heights']
+     #
+         
      other_keys = fref.keys()
      
      for key in key_list:

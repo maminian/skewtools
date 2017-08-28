@@ -1,9 +1,9 @@
-todo (last updated 23 August 2017):
+todo (last updated 25 August 2017):
 
 1. Update duct/racetrack/ellipse with median stuff (DONE)
 2. Set up code to write to stdout 6
 3. Clean up robin/pulsatile/normal mess on channel (think about modular stuff)
 4. Fix channel code outputs; nTot in particular. Probably can remove some junk.
 5. Possibly merge the scripts for 2d/3d save_the_rest?
-6. ...
+7. ...
 
