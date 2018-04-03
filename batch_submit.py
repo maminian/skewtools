@@ -2,6 +2,7 @@
 #
 
 import subprocess,os
+import random
 
 # -------------------------
 # Parameters specifying the number of runs,
@@ -12,12 +13,12 @@ execute = "local"   # if "local" then run directly, sequentially.
                     # "bsub" submits jobs to Kure/Killdevil.
                     # "longleaf" submits jobs to Longleaf.
 
-n = 10               # number of trials to run.
-fname_prefix = "rectangle_"
-parent = "./ngons/"
-sim_folder = "rectangle/"
+n = 3               # number of trials to run.
+fname_prefix = "ch_"
+parent = "./temp/"
+sim_folder = ""
 
-exe_loc = "./duct_mc"
+exe_loc = "./channel_mc"
 
 # ------------------
 # More bsub options
@@ -34,36 +35,39 @@ out_suffix = '.h5'
 # ------------------------
 
 def process_parameter_file(time_loc,i):
-# Looks at the parameter file, checks if the line 
-# specifying the RNG seed is filled in with an 
-# integer. If it is, leave it. If not, replace the line 
-# with a seed based on the operating system RNG 
+# Looks at the parameter file, checks if the line
+# specifying the RNG seed is filled in with an
+# integer. If it is, leave it. If not, replace the line
+# with a seed based on the operating system RNG
 # (eg, /dev/urandom.) Python handles this part automatically.
 
-     tfile = open(time_loc,'r')
-     lines = tfile.readlines()
-     
-     # If thing is not an integer, replace the line 
-     # with a random seed.
-     sidx = 31 # Line which should hold the seed.
-     seed = lines[sidx].split()
-     try:
-          int(seed)
-     except:
-          int1 = int(os.urandom(10).encode('hex'),16)
-          int2 = i*int(os.urandom(10).encode('hex'),16)
-          
-          # Bitwise XOR. Why? I don't know. Just because.
-          int3 = int1^int2
-          
-          lines[sidx] = str(int3)[-8:-1]+' \n'
-     # end try
-     tfile.close()
-     
-     tfile = open(time_loc,'w')
-     tfile.writelines(lines)
-     tfile.close()
-     
+    tfile = open(time_loc,'r')
+    lines = tfile.readlines()
+
+    # If thing is not an integer, replace the line
+    # with a random seed.
+    sidx = 31 # Line which should hold the seed.
+    seed = lines[sidx].split()
+    try:
+        int(seed[0])
+    except:
+
+        #   int1 = int(os.urandom(10).decode(encode('hex'),16)
+        #   int2 = i*int(os.urandom(10).encode('hex'),16)
+        int1 = random.SystemRandom().randint(0,10**16)
+        int2 = random.SystemRandom().randint(0,10**16)
+
+        # Bitwise XOR. Why? I don't know. Just because.
+        int3 = int1^int2
+
+        lines[sidx] = str(int3)[-8:-1]+' \n'
+    # end try
+    tfile.close()
+
+    tfile = open(time_loc,'w')
+    tfile.writelines(lines)
+    tfile.close()
+
 # end def
 
 # Creating simulation initialization files.
@@ -74,16 +78,16 @@ for i in range(n):
      param_loc = folder+"parameters_mc_"+fname_prefix+stridx+".txt"
      out_loc = file_prefix+stridx
 
-     # Copy the parameter files to the appropriate place, and 
+     # Copy the parameter files to the appropriate place, and
      # generate seeds if necessary.
      copy_command1 = ["cp","parameters_mc.txt",param_loc]
 
      subprocess.call(copy_command1)
 
-     process_parameter_file(param_loc,i)        
+     process_parameter_file(param_loc,i)
 # end if
 
-# Check if the appropriate out/ and err/ folders 
+# Check if the appropriate out/ and err/ folders
 # exist; if not, make them.
 stdoutfolder = folder+"out/"
 stderrfolder = folder+"err/"
@@ -101,7 +105,7 @@ for i in range(n):
 
      param_loc = folder+"parameters_mc_"+fname_prefix+stridx+".txt"
      out_loc = file_prefix+stridx+out_suffix
-     
+
      if (execute=="bsub"):
           bsub_prefix = ["bsub","-n","1","-o",folder+"out/"+"out."+stridx,"-e",folder+"err/"+"err."+stridx]
 
@@ -137,10 +141,10 @@ for i in range(n):
           command = longleaf_prefix + tlimit + mem + exe_command
 #          print command
      else:
-          print "Unrecognized platform; \"execute\" must be one of \"local\", \"bsub\", or \"longleaf\"."
+          print("Unrecognized platform; \"execute\" must be one of \"local\", \"bsub\", or \"longleaf\".")
      # end if
 
 
      subprocess.call(command)
-     
+
 # end for
