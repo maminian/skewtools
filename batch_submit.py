@@ -12,12 +12,12 @@ execute = "local"   # if "local" then run directly, sequentially.
                     # "bsub" submits jobs to Kure/Killdevil.
                     # "longleaf" submits jobs to Longleaf.
 
-n = 10               # number of trials to run.
-fname_prefix = "rectangle_"
-parent = "./ngons/"
-sim_folder = "rectangle/"
+n = 1               # number of trials to run.
+fname_prefix = "tr_"
+parent = "./fr_tr/"
+sim_folder = ""
 
-exe_loc = "./duct_mc"
+exe_loc = "./triangle_mc"
 
 # ------------------
 # More bsub options
