@@ -1,7 +1,7 @@
 # Script to execute a single execute locally.
 #
 
-import subprocess,os,multiprocessing
+import subprocess,os,multiprocessing,random
 import numpy as np
 
 # -------------------------
@@ -16,8 +16,8 @@ execute = "katrina"   # if "local" then run directly, sequentially.
                 # multiprocessing package to submit nprocs
                 # jobs at a time.
 
-n = 6            # number of trials to run.
-fname_prefix = "tr_test_"
+n = 96            # number of trials to run.
+fname_prefix = "tr_"
 parent = "./triangle-rev1/"
 sim_folder = ""
 
@@ -26,7 +26,7 @@ exe_loc = "./triangle_mc"
 # ------------------
 # More bsub options
 
-nprocs = 2 # number of processes; currently only used by "katrina" execute.
+nprocs = 48 # number of processes; currently only used by "katrina" execute.
 memoryreq = 16384	# in MB
 queue = "week"
 
@@ -53,7 +53,8 @@ def process_parameter_file(time_loc,i):
     sidx = 31 # Line which should hold the seed.
     seed = lines[sidx].split()
     try:
-       int(seed[0])
+       int(seed)
+#       int(seed[0])
     except:
 
        #   int1 = int(os.urandom(10).decode(encode('hex'),16)
