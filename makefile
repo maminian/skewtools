@@ -19,7 +19,8 @@ MODS = $(HOME)/modules
 # 
 # ----------------------
 
-FC        = /home/katrina/a/aminian/local_installs/hdf5-1.10.1-build-serial/bin/h5fc
+#FC        = /home/katrina/a/aminian/local_installs/hdf5-1.10.1-build-serial/bin/h5fc
+FC = /home/katrina/a/aminian/local_installs/hdf5-1.10.1-racecar/install/bin/h5fc
 
 # ---------
 # Link your BLAS and LAPACK libraries.
@@ -54,7 +55,7 @@ LINKS   = $(BLAS)
 # exe names, object names.
 EXES_MC = channel_mc duct_mc ellipse_mc triangle_mc racetrack_mc
 EXES_DIRECT = rect_duct rootfinder duct_keff duct_chatwin_keff
-EXES_COMPS = dump_uduct_flow dump_utriangle_flow channel_moments_exact pipe_skew_exact duct_skew_exact largepe_root dump_uduct_flow_ss
+EXES_COMPS = dump_uduct_flow dump_utriangle_flow dump_uracetrack_flow channel_moments_exact pipe_skew_exact duct_skew_exact largepe_root dump_uduct_flow_ss
 EXES_TEST = cchoose_test rng_tester sortpairs_tester hdf_test1 h5_1d_rw_test lltest mergesort_test median_test
 
 EXES = $(EXES_MC) $(EXES_DIRECT) $(EXES_COMPS) $(EXES_TEST)
@@ -115,9 +116,18 @@ dump_utriangle_flow: $(TEST)/dump_utriangle_flow.f90
 	$(FC) $(LINKS) $(MODS)/*.f90 $(UTILS)/*.f90 $(COMPS)/*.f90 -o $@ $(TEST)/$@.f90 $(LINKS) $(OTHER)
 	$(CLEANUP)
 
-hdf_test1: $(TEST)/hdf_test1.f90
-	$(FC) $(LINKS) $(UTILS)/*.f90 $(COMPS)/*.f90 -o $@ $(TEST)/$@.f90 $(LINKS) $(OTHER)
+dump_uracetrack_flow: $(TEST)/dump_uracetrack_flow.f90
+	$(FC) $(LINKS) $(MODS)/*.f90 $(UTILS)/*.f90 $(COMPS)/*.f90 -o $@ $(TEST)/$@.f90 $(LINKS) $(OTHER)
 	$(CLEANUP)
+
+hdf_test1: $(TEST)/hdf_test1.f90
+	$(FC) $(LINKS) $(MODS)/*.f90 $(UTILS)/*.f90 $(COMPS)/*.f90 -o $@ $(TEST)/$@.f90 $(LINKS) $(OTHER)
+	$(CLEANUP)
+
+#triangle_mc: $(MONTE)/triangle_mc.f90
+#	$(FC) $(LINKS) $(MODS)/*.f90 $(UTILS)/*.f90 $(COMPS)/*.f90 -o $@ $(MONTE)/$@.f90 $(LINKS) $(OTHER)
+#	$(CLEANUP)
+
 	
 channel_moments_exact: $(DIRECT)/channel_moments_exact.f90
 	$(FC) $(LINKS) $(UTILS)/*.f90 $(COMPS)/*.f90 -o $@ $(DIRECT)/$@.f90 $(LINKS) $(OTHER)

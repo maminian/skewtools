@@ -34,14 +34,14 @@ else:
 # end if
 
 # HACK FOR TRIANGLE
-vminval = -0.3
-vmaxval = u.max()
+#vminval = -0.3
+#vmaxval = u.max()
 
-ax.contour(Z,Y,u-vminval,61,colors='white',vmin=vminval,vmax=vmaxval)
+ax.contour(Z,Y,u-vminval,21,colors='white',vmin=vminval,vmax=vmaxval, linewidths=0.5)
 ax.contour(Z,Y,u-vminval,[0.],colors='red',vmin=vminval,vmax=vmaxval)
 con=ax.contourf(Z,Y,u,61,cmap=pyplot.cm.viridis,vmin=vminval,vmax=vmaxval)
 #ax.set_aspect('equal', adjustable='box')
-ax.hold(True)
+#ax.hold(True)
 
 uell = 0.5-Y**2-(Z/aratio)**2
 #ax.contour(Z,Y,uell,colors='black')

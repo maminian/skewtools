@@ -16,17 +16,17 @@ execute = "katrina"   # if "local" then run directly, sequentially.
                 # multiprocessing package to submit nprocs
                 # jobs at a time.
 
-n = 96            # number of trials to run.
-fname_prefix = "tr_"
-parent = "./triangle-rev1/"
-sim_folder = ""
+n = 1            # number of trials to run.
+fname_prefix = "et_"
+parent = ""
+sim_folder = "racetrack/"
 
-exe_loc = "./triangle_mc"
+exe_loc = "./racetrack_mc"
 
 # ------------------
 # More bsub options
 
-nprocs = 48 # number of processes; currently only used by "katrina" execute.
+nprocs = 10 # number of processes; currently only used by "katrina" execute.
 memoryreq = 16384	# in MB
 queue = "week"
 
