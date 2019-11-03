@@ -20,7 +20,7 @@ implicit none
      ! Set up the binning.
      xmin = minval(X)
      xmax = maxval(X)
-!     write(*,*) xmin,xmax
+
      if (xmin .eq. xmax) then
           xmin = xmin - 1.0d0
           xmax = xmax + 1.0d0
@@ -40,10 +40,6 @@ implicit none
           hcy(j) = ymin + (j-0.5d0)*dby
      end do
 
-!     write(*,*) ymin,ymax,dby
-!     write(*,*) nhb,nby
-
-
      do i=1,nhb
           do j=1,nby
                heights(i,j) = 0.0d0
@@ -54,11 +50,7 @@ implicit none
      call uniform_bins_idx(n,X,xmin,xmax,nhb,Xidx)
      call uniform_bins_idx(n,Y,ymin,ymax,nby,Yidx)
 
-!     write(*,*) minval(Xidx),maxval(Xidx),nhb
-!     write(*,*) minval(Yidx),maxval(Yidx),nby
-
      do j=1,n
-!          write(*,*) j,X(j),nhb,Xidx(j)
           heights(Xidx(j),Yidx(j)) = heights(Xidx(j),Yidx(j)) + 1.0d0
      end do
 

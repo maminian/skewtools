@@ -34,11 +34,6 @@ implicit none
 
      flag = ((bdf .lt. 0.0d0) .and. (nrefl .lt. mmr))
 
-!     if (bdf .lt. 0.0d0) then
-!          write(*,*) "moo",nrefl
-!          write(*,*) y0,z0,bdistfun_rt(y0,z0,aratio,q)
-!          write(*,*) y1,z1,bdistfun_rt(y1,z1,aratio,q)
-!     end if
 
      do while ( flag )
 
@@ -48,21 +43,12 @@ implicit none
           ! Essentially a 1D calculation, should be able to do 
           ! a couple iterations of Newton's method to capture.
           call calc_intersection_pt_rt(yold,zold,yf,zf,aratio,q,s,.false.)
-!          if ( ( s .lt. 0.0d0) .or. (s .gt. 1.0d0) ) then
-!               call calc_intersection_pt_rt(yold,zold,yf,zf,aratio,q,s,.true.)
-!               write(*,*) "moo",nrefl
-!               write(*,*) s
-!               write(*,*) yold,zold,bdistfun_rt(yold,zold,aratio,q)
-!               write(*,*) yf,zf,bdistfun_rt(yf,zf,aratio,q)
-!               read(*,*)
-!          end if
+
           ! Find the coordinates of intersection.
           yc = yold + s*(yf-yold)
           zc = zold + s*(zf-zold)
 
           ! Construct the component of the vector going out of the domain.
-!          write(*,*) "moo"
-!          write(*,*) yc,zc,bdistfun_rt(yc,zc,aratio,q)
           v1(1) = yf-yc
           v1(2) = zf-zc
           
@@ -86,27 +72,16 @@ implicit none
 
 
           flag = ((bdf .lt. 0.0d0) .and. (nrefl .lt. mmr))
-!          write(*,*) (bdf .lt. 0.0d0),nrefl,mmr,flag
      end do
 
 
-     ! Last line of defense.
-     if (bdf .lt. 0.0d0) then
-          write(*,*) bdf
-     end if
-
      if ((nrefl .eq. mmr) .and. (bdf .lt. 0.0d0)) then
-!          write(*,*) "moo"
           yout = y0
           zout = z0
      end if
      
      yout = yf
      zout = zf
-!     write(*,*) y0,z0,bdistfun_rt(y0,z0,aratio,q)
-!     write(*,*) y1,z1,bdistfun_rt(y1,z1,aratio,q)
-!     write(*,*) yout,zout,bdistfun_rt(yout,zout,aratio,q)
-
      
 end subroutine impose_reflective_BC_racetrack
 
@@ -201,7 +176,6 @@ implicit none
           call lininterp_rt(zl,zr,sl,sr,sc,zc)
           vc = bdistfun_rt(yc,zc,aratio,q)
           
-!          write(*,*) dabs(vc),tol,yc,zc,sc
           if (diagnose) then
                write(*,*) i,sc,vc,tol
           end if
@@ -224,7 +198,6 @@ implicit none
           if (diagnose) then
                write(*,*) nni,sc,vc,tol
           end if
-!          write(*,*) dabs(vc),tol,yc,zc,sc
           flag = ((dabs(vc) .gt. tol) .and. (nni .le. mnni))
      end do
 

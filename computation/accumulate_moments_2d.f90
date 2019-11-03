@@ -65,7 +65,6 @@ implicit none
 
           
           bin_idxs = Yidx + (nby-1)*(Zidx-1) + 1
-          write(*,*) minval(bin_idxs),maxval(bin_idxs),1,nby*nbz
           do i=1,nTot
                if ((bin_idxs(i) .lt. 1) .or. (bin_idxs(i) .gt. nby*nbz)) then
                     write(*,*) 
@@ -77,9 +76,6 @@ implicit none
                end if
           end do
           ! Now sort the list of X positions based on their bin index.
-!          write(*,*) minval(Y),maxval(Y),yl,yr
-!          write(*,*) minval(Z),maxval(Z),zl,zr
-!          write(*,*) minval(bin_idxs),maxval(bin_idxs)
           call sortpairs(nTot,X,Xsorted,bin_idxs,nbins)
 
 

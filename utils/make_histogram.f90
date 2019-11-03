@@ -30,7 +30,6 @@ implicit none
      ! Set up the binning.
      xmin = minval(X)
      xmax = maxval(X)
-!     write(*,*) xmin,xmax
      if (xmin .eq. xmax) then
           xmin = xmin - 1.0d0
           xmax = xmax + 1.0d0
@@ -49,7 +48,6 @@ implicit none
 
 
      do j=1,n
-!          write(*,*) j,X(j),nhb,Xidx(j)
           heights(Xidx(j)) = heights(Xidx(j)) + 1.0d0
      end do
 

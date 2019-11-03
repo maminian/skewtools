@@ -15,7 +15,6 @@ implicit none
 
      if ((ymin .lt. -a) .or. (ymax .gt. a)) then
           check_ic_channel = .false.
-          write(*,*) ymin,ymax,a
      else
           check_ic_channel = .true.
      end if
