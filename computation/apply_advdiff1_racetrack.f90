@@ -66,9 +66,9 @@ implicit none
           z1 = zv(i) + W(3,i)
 
           call reflector(yv(i),zv(i),y1,z1,yprev,zprev,aratio,q,maxrefl)
-          if (bdistfun_rt(yv(i),zv(i),aratio,q) .lt. 0.0d0) then
-               write(*,*) yv(i),zv(i),bdistfun_rt(yv(i),zv(i),aratio,q)
-          end if
+!          if (bdistfun_rt(yv(i),zv(i),aratio,q) .lt. 0.0d0) then
+!               write(*,*) yv(i),zv(i),bdistfun_rt(yv(i),zv(i),aratio,q)
+!          end if
      end do
 
 end subroutine apply_advdiff1_racetrack

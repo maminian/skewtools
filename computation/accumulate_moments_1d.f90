@@ -74,7 +74,6 @@ implicit none
                ! assuming bin_idxs has been sorted already.
                fi = li+1
                li = fi
-!               write(*,*) fi,li,shape(bin_idxs)
                do while ( (bin_idxs(li) .eq. idx) )
                     li = li + 1
 

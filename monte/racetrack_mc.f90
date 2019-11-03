@@ -36,7 +36,7 @@ implicit none
      double precision, dimension(:), allocatable       :: X,Y,Z
      double precision, dimension(:,:), allocatable     :: Xbuffer,Ybuffer,Zbuffer
      integer                                           :: buffer_len,bk,inext,rem
-     double precision, dimension(:), allocatable       :: means,vars,skews,kurts,t_hist
+     double precision, dimension(:), allocatable       :: means,vars,skews,kurts,t_hist, medians
      
      double precision, dimension(:,:,:), allocatable   :: means_sl,vars_sl,skews_sl,kurts_sl
      double precision, dimension(:,:), allocatable     :: hist_centers,hist_heights
@@ -164,7 +164,7 @@ implicit none
      allocate(X(nTot), Y(nTot), Z(nTot))
 
      ! Channel-averaged stats
-     allocate(means(ntt), vars(ntt), skews(ntt),kurts(ntt))
+     allocate(means(ntt), vars(ntt), skews(ntt), kurts(ntt), medians(ntt))
 
      ! Stats on Y slices (integrated across Z)
      if (.not. (n_bins .eq. 0)) then
@@ -256,6 +256,9 @@ implicit none
      
      call accumulate_moments_2d(tt_idx,ntt,nTot,X,Y,Z,-a,a,-b,b,means,vars,skews,&
                kurts,nby,nbz,means_sl,vars_sl,skews_sl,kurts_sl)
+     
+     ! compute initial median
+     call median(nTot,X,medians(tt_idx))
 
      call make_histogram(nTot,X,nhb,hist_centers(tt_idx,1:nhb),hist_heights(tt_idx,1:nhb))
 
@@ -306,9 +309,9 @@ implicit none
                
                call accumulate_moments_2d(tt_idx,ntt,nTot,X,Y,Z,-a,a,-b,b,means,vars,skews,&
                          kurts,nby,nbz,means_sl,vars_sl,skews_sl,kurts_sl)
-
-!subroutine accumulate_moments_2d(tt_idx,ntt,nTot,X,Y,Z,yl,yr,zl,zr,means,vars,skews,&
-!               kurts,nby,nbz,means_sl,vars_sl,skews_sl,kurts_sl)
+               
+               ! Compute median separately    
+               call median(nTot, X, medians(tt_idx))
                
                call make_histogram(nTot,X,nhb,hist_centers(tt_idx,1:nhb),hist_heights(tt_idx,1:nhb))
                
@@ -381,7 +384,7 @@ implicit none
      call h5close_f(h5error)
 
      if (save_hist2d) then
-           write(*,*) nbx,nby,shape(hist2dcx),shape(hist2dcy),shape(hist2d)
+
           arrayname = "hist2dcx"
           descr = "Array tracking bin centers in the x direction for hist2d"
           call hdf_add_2d_darray_to_file(ntt,nbx,hist2dcx,fname2,arrayname,descr)
@@ -400,14 +403,15 @@ implicit none
      !
      !
      
-     call save_the_rest_duct(fname2,geometry,ntt,target_times,means,vars,skews,kurts,nby,nbz,&
-                              means_sl,vars_sl,skews_sl,kurts_sl,nhb,hist_centers,hist_heights,&
+     call save_the_rest_duct(fname2,geometry,ntt,target_times,means,vars,skews,kurts,medians,&
+                              nby,nbz,means_sl,vars_sl,skews_sl,kurts_sl,&
+                              nhb,hist_centers,hist_heights,&
                               Pe,nTot,mt_seed,aratio,q,dtmax,t_warmup)
 
      ! ------
      deallocate(X,Y,Z)
 
-     deallocate(means,vars,skews,kurts,target_times)
+     deallocate(means,vars,skews,kurts,medians,target_times)
      
      if (.not. (n_bins .eq. 0)) then
           deallocate(means_sl,vars_sl,skews_sl,kurts_sl)
